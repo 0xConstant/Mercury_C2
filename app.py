@@ -1,14 +1,23 @@
-from flask import Flask, request, jsonify, Response, render_template, send_file, send_from_directory
+from flask import (Flask, request, jsonify, Response, render_template,
+                   send_file, send_from_directory, redirect, flash, url_for)
 import os, zipfile
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from os.path import getsize
+from flask_login import LoginManager, login_required, current_user, UserMixin, login_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # SQLite DB location
 db = SQLAlchemy(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+app.config["SECRET_KEY"] = "fksdly48thergl9#8%3@45t%u9834tu95$hgui$rfg49$t67"
 
+
+# ---------------------- Database tables ---------------------- #
 
 class Agents(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -25,10 +34,27 @@ class Agents(db.Model):
     file_addition = db.Column(db.DateTime)
 
 
+class Administrator(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+    def is_active(self):
+        return True
+
+
 with app.app_context():
     #db.drop_all()
     db.create_all()
 
+
+# ---------------------- Public Routes ---------------------- #
 
 @app.route('/add_agent', methods=['POST'])
 def add_agent():
@@ -111,8 +137,33 @@ def speedtest():
     return "Speed test done"
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        remember = True if request.form.get("remember_me") else False
+
+        user = Administrator.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user, remember=remember)
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid username or password.', 'danger')
+
+    return render_template("login.html")
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Administrator.query.get(int(user_id))
+
 # ---------------------- Protected Routes ---------------------- #
+
 @app.route('/')
+@login_required
 def command():
     agents = Agents.query.all()
     return render_template('command.html', active='command', agents=agents)
@@ -130,6 +181,7 @@ def get_total_size(path):
 
 @app.route('/view_files/<uid>', defaults={'subpath': None}, methods=['GET'])
 @app.route('/view_files/<uid>/<path:subpath>', methods=['GET'])
+@login_required
 def view_files(uid, subpath=None):
     agent = Agents.query.filter_by(uid=uid).first()
     if not agent:
@@ -186,6 +238,7 @@ def view_files(uid, subpath=None):
 
 
 @app.route('/download_file/<uid>/<path:subpath>')
+@login_required
 def download_file(uid, subpath):
     agent = Agents.query.filter_by(uid=uid).first()
     if not agent:
@@ -199,6 +252,7 @@ def download_file(uid, subpath):
 
 
 @app.route('/logout')
+@login_required
 def logout():
     return 500
 
