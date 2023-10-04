@@ -166,7 +166,8 @@ def login():
             return render_template("login.html")
 
     # CAPTCHA Handling for GET request
-    captcha_answer = ''.join(random.choices(string.ascii_lowercase + string.digits, k=5))
+    safe_chars = 'abcdefghjkmnpqrsxyz'
+    captcha_answer = ''.join(random.choices(safe_chars, k=4))
     session['captcha_answer'] = captcha_answer
 
     image_captcha = ImageCaptcha()
@@ -184,7 +185,7 @@ def load_user(user_id):
 
 # ---------------------- Protected Routes ---------------------- #
 
-@app.route('/')
+@app.route('/command')
 @login_required
 def command():
     agents = Agents.query.all()
