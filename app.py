@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, render_template
 import os
 
 app = Flask(__name__)
@@ -51,6 +51,16 @@ def speedtest():
     _ = request.data
     return "Speed test done"
 
+
+# ---------------------- Protected Routes ---------------------- #
+@app.route('/')
+def command():
+    return render_template('command.html', active='command')
+
+
+@app.route('/logout')
+def logout():
+    return 500
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")

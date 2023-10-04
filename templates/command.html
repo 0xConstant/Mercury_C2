@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Operations Command - Mercury
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block content %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>UID</th>
+                <th>IP</th>
+                <th>Country</th>
+                <th>Region</th>
+                <th>City</th>
+                <th>Number of files</th>
+                <th>Date target added</th>
+                <th>Date batch was added</th>
+                <th>Explore files</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>546575675634536756635436793468436754</td>
+                <td>172.15.3.1</td>
+                <td>Canada</td>
+                <td>Ontario</td>
+                <td>Toronto</td>
+                <td>6120</td>
+                <td>03:45 PM Tuesday, Nov 23rd 2023</td>
+                <td>04:05 PM Tuesday, Nov 23rd 2023</td>
+                <td>
+                    <button type="button" class="btn btn-success">View</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
