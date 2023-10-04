@@ -162,8 +162,10 @@ def view_files(uid, subpath=None):
     for file in files:
         total_size += getsize(os.path.join(base_path, file))
 
+    total_files = sum([len(files) for _, _, files in os.walk(base_path)])
+
     return render_template("explorer.html", directories=directories, files=files, agent=agent, subpath=subpath,
-                           breadcrumbs=breadcrumbs, total_size=total_size, num_files=num_files)
+                           breadcrumbs=breadcrumbs, total_size=total_size, num_files=num_files, total_files=total_files)
 
 
 @app.route('/download_file/<uid>/<path:subpath>')
