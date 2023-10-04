@@ -14,32 +14,39 @@
             <tr>
                 <th>ID</th>
                 <th>UID</th>
-                <th>IP</th>
-                <th>Country</th>
-                <th>Region</th>
-                <th>City</th>
-                <th>Number of files</th>
-                <th>Date target added</th>
-                <th>Date batch was added</th>
+                <th>Username</th>
+                <th>Hostname</th>
+                <th>FQDN</th>
+                <th>Domain</th>
+                <th>Local IP</th>
+                <th>Local Groups</th>
+                <th>AD Groups</th>
+                <th>Agent creation</th>
+                <th>File addition</th>
                 <th>Explore files</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>1</td>
-                <td>546575675634536756635436793468436754</td>
-                <td>172.15.3.1</td>
-                <td>Canada</td>
-                <td>Ontario</td>
-                <td>Toronto</td>
-                <td>6120</td>
-                <td>03:45 PM Tuesday, Nov 23rd 2023</td>
-                <td>04:05 PM Tuesday, Nov 23rd 2023</td>
-                <td>
-                    <button type="button" class="btn btn-success">View</button>
-                </td>
-            </tr>
+            {% for agent in agents %}
+                <tr>
+                    <td>{{ agent.id }}</td>
+                    <td>{{ agent.uid }}</td>
+                    <td>{{ agent.username }}</td>
+                    <td>{{ agent.hostname }}</td>
+                    <td>{{ agent.fqdn }}</td>
+                    <td>{{ agent.domain }}</td>
+                    <td>{{ agent.local_ip }}</td>
+                    <td>{{ agent.local_groups }}</td>
+                    <td>{{ agent.ad_groups }}</td>
+                    <td>{{ agent.agent_creation.strftime('%Y-%m-%d %H:%M:%S') if agent.agent_creation else 'N/A'}}</td>
+                    <td>{{ agent.file_addition.strftime('%Y-%m-%d %H:%M:%S') if agent.file_addition else 'N/A' }}</td>
+                    <td>
+                        <button type="button" class="btn btn-success">View</button>
+                    </td>
+                </tr>
+            {% endfor %}
             </tbody>
+
         </table>
     </div>
 {% endblock %}

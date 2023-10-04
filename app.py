@@ -1,7 +1,51 @@
 from flask import Flask, request, jsonify, Response, render_template
 import os
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # SQLite DB location
+db = SQLAlchemy(app)
+
+
+class Agents(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    uid = db.Column(db.String(80))
+    hostname = db.Column(db.String(80))
+    username = db.Column(db.String(80))
+    fqdn = db.Column(db.String(80))
+    domain = db.Column(db.String(80))
+    local_ip = db.Column(db.String(80))
+    local_groups = db.Column(db.String(80))
+    ad_groups = db.Column(db.String(80))
+    agent_creation = db.Column(db.DateTime)
+    file_addition = db.Column(db.DateTime)
+
+
+with app.app_context():
+    db.create_all()
+
+
+@app.route('/add_agent', methods=['POST'])
+def add_agent():
+    data = request.json
+    new_agent = Agents(
+        uid=data.get('uid', None),
+        hostname=data.get('hostname', None),
+        username=data.get('username', None),
+        fqdn=data.get('fqdn', None),
+        domain=data.get('domain', None),
+        local_ip=data.get('local_ip', None),
+        local_groups=data.get('local_groups', None),
+        ad_groups=data.get('ad_groups', None),
+        agent_creation=datetime.now().astimezone()
+    )
+
+    db.session.add(new_agent)
+    db.session.commit()
+
+    return jsonify({'message': 'created'}), 201
 
 
 @app.route('/upload', methods=['POST'])
@@ -55,7 +99,8 @@ def speedtest():
 # ---------------------- Protected Routes ---------------------- #
 @app.route('/')
 def command():
-    return render_template('command.html', active='command')
+    agents = Agents.query.all()
+    return render_template('command.html', active='command', agents=agents)
 
 
 @app.route('/logout')
