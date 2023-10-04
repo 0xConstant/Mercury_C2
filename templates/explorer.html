@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Target {{ agent.id }} Files - Mercury
+    Agent #{{ agent.id }} Files - Mercury
 {% endblock %}
 
 {% block stylesheets %}
@@ -9,8 +9,28 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Files and Directories for {{ agent.id }}</h2>
+    <table class="table">
+            <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>UID</th>
+                <th>Username</th>
+                <th>Hostname</th>
+                <th>Domain</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ agent.id }}</td>
+                    <td>{{ agent.uid }}</td>
+                    <td>{{ agent.username }}</td>
+                    <td>{{ agent.hostname }}</td>
+                    <td>{{ agent.domain }}</td>
+                </tr>
+            </tbody>
 
+        </table>
+    <hr>
     <!-- Breadcrumbs -->
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ url_for('view_files', uid=agent.uid) }}">Root</a></li>
