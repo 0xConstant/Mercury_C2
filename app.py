@@ -2,9 +2,9 @@ from flask import (Flask, request, jsonify, Response, render_template,
                    send_file, send_from_directory, redirect, flash, url_for)
 import os, zipfile
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
 from os.path import getsize
-from flask_login import LoginManager, login_required, current_user, UserMixin, login_user
+from flask_login import LoginManager, login_required, current_user, UserMixin, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -15,6 +15,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 app.config["SECRET_KEY"] = "fksdly48thergl9#8%3@45t%u9834tu95$hgui$rfg49$t67"
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(hours=24)
 
 
 # ---------------------- Database tables ---------------------- #
@@ -140,7 +141,7 @@ def speedtest():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('command'))
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -149,7 +150,7 @@ def login():
         user = Administrator.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             login_user(user, remember=remember)
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('command'))
         else:
             flash('Invalid username or password.', 'danger')
 
@@ -254,7 +255,8 @@ def download_file(uid, subpath):
 @app.route('/logout')
 @login_required
 def logout():
-    return 500
+    logout_user()
+    return redirect(url_for('login'))
 
 
 if __name__ == '__main__':
