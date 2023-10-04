@@ -38,10 +38,14 @@
                     <td>{{ agent.local_ip }}</td>
                     <td>{{ agent.local_groups }}</td>
                     <td>{{ agent.ad_groups }}</td>
-                    <td>{{ agent.agent_creation.strftime('%Y-%m-%d %H:%M:%S') if agent.agent_creation else 'N/A'}}</td>
+                    <td>{{ agent.agent_creation.strftime('%Y-%m-%d %H:%M:%S') if agent.agent_creation else 'N/A' }}</td>
                     <td>{{ agent.file_addition.strftime('%Y-%m-%d %H:%M:%S') if agent.file_addition else 'N/A' }}</td>
                     <td>
-                        <button type="button" class="btn btn-success">View</button>
+                        {% if agent.file_path %}
+                            <a href="{{ url_for('view_files', uid=agent.uid) }}" class="btn btn-success">View</a>
+                        {% else %}
+                            <span>N/A</span>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
