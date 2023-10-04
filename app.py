@@ -232,6 +232,9 @@ def view_files(uid, subpath=None):
         else:
             files.append(item)
 
+    directories.sort()
+    files.sort()
+
     # Breadcrumbs
     breadcrumbs = []
     if subpath:
@@ -249,15 +252,21 @@ def view_files(uid, subpath=None):
 
     # Size of the root directory and everything in it
     base_size = get_total_size(base_path)
-    num_files = 0  # reset this variable
+    total_num_files = 0  # reset this variable
     for dirpath, dirnames, filenames in os.walk(base_path):
-        num_files += len(filenames)
+        total_num_files += len(filenames)
 
     total_files = sum([len(files) for _, _, files in os.walk(base_path)])
 
+    # Collecting all starting characters from directories and files
+    all_chars = set(dir[0].lower() for dir in directories)
+    all_chars.update(file[0].lower() for file in files)
+    all_chars = sorted(list(all_chars))
+
     return render_template("explorer.html", directories=directories, files=files, agent=agent, subpath=subpath,
                            breadcrumbs=breadcrumbs, total_size=total_size, num_files=num_files, total_files=total_files,
-                           base_size=base_size)
+                           base_size=base_size, all_chars=all_chars, total_num_files=total_num_files)
+
 
 
 @app.route('/download_file/<uid>/<path:subpath>')
