@@ -48,6 +48,9 @@
                             <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
                             <label class="form-check-label" for="rememberMe">Remember me</label>
                         </div>
+                        <img src="{{ captcha_image_url }}" alt="CAPTCHA">
+                        <input type="text" name="captcha_response" placeholder="Enter CAPTCHA" required>
+                        <br><br>
                         <button type="submit" class="btn btn-primary">Login</button>
                     </form>
                 </div>

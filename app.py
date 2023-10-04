@@ -1,11 +1,12 @@
 from flask import (Flask, request, jsonify, Response, render_template,
-                   send_file, send_from_directory, redirect, flash, url_for)
-import os, zipfile
+                   send_file, send_from_directory, redirect, flash, url_for, session)
+import os, zipfile, string, random
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from os.path import getsize
 from flask_login import LoginManager, login_required, current_user, UserMixin, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from captcha.image import ImageCaptcha
 
 
 app = Flask(__name__)
@@ -142,7 +143,16 @@ def speedtest():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('command'))
+
+    # CAPTCHA Handling for POST request
     if request.method == "POST":
+        captcha_response = request.form.get("captcha_response", "").strip().lower()
+        stored_captcha = session.get("captcha_answer", "").lower()
+
+        if not captcha_response or captcha_response != stored_captcha:
+            flash('Invalid CAPTCHA answer.', 'danger')
+            return redirect(url_for('login'))
+
         username = request.form.get("username")
         password = request.form.get("password")
         remember = True if request.form.get("remember_me") else False
@@ -153,8 +163,19 @@ def login():
             return redirect(url_for('command'))
         else:
             flash('Invalid username or password.', 'danger')
+            return render_template("login.html")
 
-    return render_template("login.html")
+    # CAPTCHA Handling for GET request
+    captcha_answer = ''.join(random.choices(string.ascii_lowercase + string.digits, k=5))
+    session['captcha_answer'] = captcha_answer
+
+    image_captcha = ImageCaptcha()
+    captcha_path = os.path.join("static", "captcha", f"captcha_{captcha_answer}.png")
+    image_captcha.write(captcha_answer, captcha_path)
+
+    # return the login page with the path to the captcha image
+    return render_template("login.html",
+                           captcha_image_url=url_for('static', filename=f'captcha/captcha_{captcha_answer}.png'))
 
 
 @login_manager.user_loader
