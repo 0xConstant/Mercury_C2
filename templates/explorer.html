@@ -14,7 +14,6 @@
             <tr>
                 <th>ID</th>
                 <th>UID</th>
-                <th>Username</th>
                 <th>Hostname</th>
                 <th>Domain</th>
                 <th>File path</th>
@@ -26,7 +25,6 @@
             <tr>
                 <td>{{ agent.id }}</td>
                 <td>{{ agent.uid }}</td>
-                <td>{{ agent.username }}</td>
                 <td>{{ agent.hostname }}</td>
                 <td>{{ agent.domain }}</td>
                 <td>{{ agent.file_path }}</td>
@@ -74,46 +72,44 @@
 
         <h4 class="mt-4">Files</h4>
 
-<!-- Display the number of files and their total size -->
-<p>Number of Files: {{ num_files }}</p>
-<p>Total Size: {{ total_size|filesizeformat }}</p>
+        <!-- Display the number of files and their total size -->
+        <p>Number of Files: {{ num_files }}</p>
+        <p>Total Size: {{ total_size|filesizeformat }}</p>
 
-<!-- Breadcrumbs for Alphabetical Jump -->
-<div>
-    <strong>Jump to: </strong>
-    {% for char in all_chars %}
-        <a href="#{{ char }}">{{ char.upper() }}</a>
-        {% if not loop.last %}|{% endif %}
-    {% endfor %}
-</div>
+        <!-- Breadcrumbs for Alphabetical Jump -->
+        <div>
+            <strong>Jump to: </strong>
+            {% for char in all_chars %}
+                <a href="#{{ char }}">{{ char.upper() }}</a>
+                {% if not loop.last %}|{% endif %}
+            {% endfor %}
+        </div>
 
-<ul class="list-group">
-    {% set current_char = namespace(value='') %} <!-- Use namespace for mutable variables -->
-    {% for file in files %}
-        {% set file_start_char = file[0].lower() %}
-        {% if file_start_char != current_char.value %}
-            {% set current_char.value = file_start_char %}
-            <li class="list-group-item list-group-item-secondary" id="{{ current_char.value }}">
-                <strong>{{ current_char.value.upper() }}</strong>
-            </li>
-        {% endif %}
-        <li class="list-group-item">
-            <i class="fas fa-file"></i>
-            {{ file }}
-            <!-- View and Download Buttons -->
-            <a href="{{ url_for('view_files', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + file) }}"
-               target="_blank" class="btn btn-success btn-sm float-right ml-2">
-                <i class="fa fa-eye"></i> View
-            </a>
-            <a href="{{ url_for('download_file', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + file) }}"
-               class="btn btn-primary btn-sm float-right">
-                <i class="fa fa-download"></i> Download
-            </a>
-        </li>
-    {% endfor %}
-</ul>
-
-
+        <ul class="list-group">
+            {% set current_char = namespace(value='') %} <!-- Use namespace for mutable variables -->
+            {% for file in files %}
+                {% set file_start_char = file[0].lower() %}
+                {% if file_start_char != current_char.value %}
+                    {% set current_char.value = file_start_char %}
+                    <li class="list-group-item list-group-item-secondary" id="{{ current_char.value }}">
+                        <strong>{{ current_char.value.upper() }}</strong>
+                    </li>
+                {% endif %}
+                <li class="list-group-item">
+                    <i class="fas fa-file"></i>
+                    {{ file }}
+                    <!-- View and Download Buttons -->
+                    <a href="{{ url_for('view_files', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + file) }}"
+                       target="_blank" class="btn btn-success btn-sm float-right ml-2">
+                        <i class="fa fa-eye"></i> View
+                    </a>
+                    <a href="{{ url_for('download_file', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + file) }}"
+                       class="btn btn-primary btn-sm float-right">
+                        <i class="fa fa-download"></i> Download
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
     </div>
     <br><br><br><br>
 {% endblock %}

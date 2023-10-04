@@ -58,6 +58,17 @@ with app.app_context():
 
 # ---------------------- Public Routes ---------------------- #
 
+def is_zip_valid(filepath):
+    try:
+        with zipfile.ZipFile(filepath, 'r') as zip_ref:
+            bad_file = zip_ref.testzip()
+            if bad_file:
+                return False
+            return True
+    except zipfile.BadZipFile:
+        return False
+
+
 @app.route('/add_agent', methods=['POST'])
 def add_agent():
     data = request.json
@@ -112,20 +123,25 @@ def upload_file():
             f.seek(beginning_bytes)
         f.write(file.read())
 
-    # Extract the zip file
-    unzip_dir = os.path.join(os.getcwd(), "files", uid)
-    if not os.path.exists(unzip_dir):
-        os.makedirs(unzip_dir)
-    with zipfile.ZipFile(filepath, 'r') as zip_ref:
-        zip_ref.extractall(unzip_dir)
-    os.remove(filepath)
+    # Check if the ZIP file is valid before extraction
+    if is_zip_valid(filepath):
+        # Extract the zip file
+        unzip_dir = os.path.join(os.getcwd(), "files", uid)
+        if not os.path.exists(unzip_dir):
+            os.makedirs(unzip_dir)
+        with zipfile.ZipFile(filepath, 'r') as zip_ref:
+            zip_ref.extractall(unzip_dir)
+        os.remove(filepath)
 
-    # Update the agent's file addition date
-    agent.file_addition = datetime.now().astimezone()
-    agent.file_path = unzip_dir  # set the folder path in the agent's record
-    db.session.commit()
+        # Update the agent's file addition date
+        agent.file_addition = datetime.now().astimezone()
+        agent.file_path = unzip_dir  # set the folder path in the agent's record
+        db.session.commit()
 
-    app.logger.info(f"File saved to {filepath} and extracted to {unzip_dir}")
+        app.logger.info(f"File saved to {filepath} and extracted to {unzip_dir}")
+
+    else:
+        app.logger.error(f"The ZIP file {filepath} is not valid or still being uploaded")
 
     if mode == 'ab':
         return Response(status=206)  # Partial Content
