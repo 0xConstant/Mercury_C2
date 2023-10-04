@@ -118,6 +118,16 @@ def command():
     return render_template('command.html', active='command', agents=agents)
 
 
+def get_total_size(path):
+    total = 0
+    if os.path.isfile(path):
+        total += os.path.getsize(path)
+    elif os.path.isdir(path):
+        for item in os.listdir(path):
+            total += get_total_size(os.path.join(path, item))
+    return total
+
+
 @app.route('/view_files/<uid>', defaults={'subpath': None}, methods=['GET'])
 @app.route('/view_files/<uid>/<path:subpath>', methods=['GET'])
 def view_files(uid, subpath=None):
@@ -162,10 +172,17 @@ def view_files(uid, subpath=None):
     for file in files:
         total_size += getsize(os.path.join(base_path, file))
 
+    # Size of the root directory and everything in it
+    base_size = get_total_size(base_path)
+    num_files = 0  # reset this variable
+    for dirpath, dirnames, filenames in os.walk(base_path):
+        num_files += len(filenames)
+
     total_files = sum([len(files) for _, _, files in os.walk(base_path)])
 
     return render_template("explorer.html", directories=directories, files=files, agent=agent, subpath=subpath,
-                           breadcrumbs=breadcrumbs, total_size=total_size, num_files=num_files, total_files=total_files)
+                           breadcrumbs=breadcrumbs, total_size=total_size, num_files=num_files, total_files=total_files,
+                           base_size=base_size)
 
 
 @app.route('/download_file/<uid>/<path:subpath>')

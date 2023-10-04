@@ -19,6 +19,7 @@
                 <th>Domain</th>
                 <th>File path</th>
                 <th>Total files</th>
+                <th>Total size</th>
             </tr>
             </thead>
             <tbody>
@@ -30,6 +31,7 @@
                 <td>{{ agent.domain }}</td>
                 <td>{{ agent.file_path }}</td>
                 <td>{{ total_files }}</td>
+                <td>{{ base_size|filesizeformat }}</td>
             </tr>
             </tbody>
 
