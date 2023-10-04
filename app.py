@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, Response, render_template, send_file,
 import os, zipfile
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from os.path import getsize
 
 
 app = Flask(__name__)
@@ -156,8 +157,13 @@ def view_files(uid, subpath=None):
                 'path': '/'.join(parts[:i+1])
             })
 
-    return render_template("explorer.html", directories=directories, files=files, agent=agent, subpath=subpath, breadcrumbs=breadcrumbs)
+    total_size = 0
+    num_files = len(files)
+    for file in files:
+        total_size += getsize(os.path.join(base_path, file))
 
+    return render_template("explorer.html", directories=directories, files=files, agent=agent, subpath=subpath,
+                           breadcrumbs=breadcrumbs, total_size=total_size, num_files=num_files)
 
 
 @app.route('/download_file/<uid>/<path:subpath>')

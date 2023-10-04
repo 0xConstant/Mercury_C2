@@ -8,8 +8,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <table class="table">
+    <div class="container mt-4">
+        <table class="table">
             <thead class="thead-dark">
             <tr>
                 <th>ID</th>
@@ -21,67 +21,82 @@
             </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>{{ agent.id }}</td>
-                    <td>{{ agent.uid }}</td>
-                    <td>{{ agent.username }}</td>
-                    <td>{{ agent.hostname }}</td>
-                    <td>{{ agent.domain }}</td>
-                    <td>{{ agent.file_path }}</td>
-                </tr>
+            <tr>
+                <td>{{ agent.id }}</td>
+                <td>{{ agent.uid }}</td>
+                <td>{{ agent.username }}</td>
+                <td>{{ agent.hostname }}</td>
+                <td>{{ agent.domain }}</td>
+                <td>{{ agent.file_path }}</td>
+            </tr>
             </tbody>
 
         </table>
-    <hr>
-    <!-- Breadcrumbs -->
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for('view_files', uid=agent.uid) }}">Root</a></li>
-        {% for crumb in breadcrumbs %}
-            <li class="breadcrumb-item"><a href="{{ url_for('view_files', uid=agent.uid, subpath=crumb.path) }}">{{ crumb.name }}</a></li>
-        {% endfor %}
-    </ol>
+        <hr>
+        <!-- Breadcrumbs -->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('view_files', uid=agent.uid) }}">Root</a></li>
+            {% for crumb in breadcrumbs %}
+                <li class="breadcrumb-item"><a
+                        href="{{ url_for('view_files', uid=agent.uid, subpath=crumb.path) }}">{{ crumb.name }}</a></li>
+            {% endfor %}
+        </ol>
 
-    <!-- Back Button -->
-    <div class="mb-3">
-        {% if subpath and '/' in subpath %}
-            <a href="{{ url_for('view_files', uid=agent.uid, subpath='/'.join(subpath.split('/')[:-1])) }}" class="btn btn-primary">
-                <i class="fa fa-arrow-left"></i> Back
-            </a>
-        {% elif subpath %}
-            <a href="{{ url_for('view_files', uid=agent.uid) }}" class="btn btn-primary">
-                <i class="fa fa-arrow-left"></i> Back
-            </a>
-        {% endif %}
+        <!-- Back Button -->
+        <div class="mb-3">
+            {% if subpath and '/' in subpath %}
+                <a href="{{ url_for('view_files', uid=agent.uid, subpath='/'.join(subpath.split('/')[:-1])) }}"
+                   class="btn btn-primary">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
+            {% elif subpath %}
+                <a href="{{ url_for('view_files', uid=agent.uid) }}" class="btn btn-primary">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
+            {% endif %}
+        </div>
+
+        <h4>Directories</h4>
+        <ul class="list-group">
+            {% for dir in directories %}
+                <li class="list-group-item">
+                    <a href="{{ url_for('view_files', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + dir) }}">
+                        <i class="fas fa-folder"></i>
+                        {{ dir }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h4 class="mt-4">Files</h4>
+
+        <!-- Display the number of files and their total size -->
+        <p>Number of Files: {{ num_files }}</p>
+        <p>Total Size: {{ total_size|filesizeformat }}</p>
+
+        <ul class="list-group">
+            {% for file in files %}
+                <!-- ... your existing code for each file ... -->
+            {% endfor %}
+        </ul>
+
+        <ul class="list-group">
+            {% for file in files %}
+                <li class="list-group-item">
+                    <i class="fas fa-file"></i>
+                    {{ file }}
+                    <!-- View and Download Buttons -->
+                    <a href="{{ url_for('view_files', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + file) }}"
+                       target="_blank" class="btn btn-success btn-sm float-right ml-2">
+                        <i class="fa fa-eye"></i> View
+                    </a>
+                    <a href="{{ url_for('download_file', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + file) }}"
+                       class="btn btn-primary btn-sm float-right">
+                        <i class="fa fa-download"></i> Download
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
     </div>
-
-    <h4>Directories</h4>
-    <ul class="list-group">
-        {% for dir in directories %}
-        <li class="list-group-item">
-            <a href="{{ url_for('view_files', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + dir) }}">
-                <i class="fas fa-folder"></i>
-                {{ dir }}
-            </a>
-        </li>
-        {% endfor %}
-    </ul>
-
-    <h4 class="mt-4">Files</h4>
-    <ul class="list-group">
-        {% for file in files %}
-        <li class="list-group-item">
-            <i class="fas fa-file"></i>
-            {{ file }}
-            <!-- View and Download Buttons -->
-            <a href="{{ url_for('view_files', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + file) }}" target="_blank" class="btn btn-success btn-sm float-right ml-2">
-                <i class="fa fa-eye"></i> View
-            </a>
-            <a href="{{ url_for('download_file', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + file) }}" class="btn btn-primary btn-sm float-right">
-                <i class="fa fa-download"></i> Download
-            </a>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
 {% endblock %}
 
