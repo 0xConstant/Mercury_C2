@@ -79,7 +79,7 @@ def is_zip_valid(filepath):
 
 
 @app.route('/add_agent', methods=['POST'])
-@limiter.limit("3 per 1 hour")
+@limiter.limit("10 per 1 hour")
 def add_agent():
     data = request.json
     new_agent = Agents(
@@ -101,7 +101,6 @@ def add_agent():
 
 
 @app.route('/upload', methods=['POST'])
-@limiter.limit("3 per 1 hour")
 def upload_file():
     file = request.files.get('file')
     uid = request.form.get('uid')
@@ -161,7 +160,7 @@ def upload_file():
 
 
 @app.route('/speedtest', methods=['POST'])
-@limiter.limit("3 per 1 hour")
+@limiter.limit("10 per 1 hour")
 def speedtest():
     _ = request.data
     return "Speed test done"
