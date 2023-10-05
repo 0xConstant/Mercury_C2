@@ -67,6 +67,12 @@ class Administrator(db.Model, UserMixin):
 
 # ---------------------- Public Routes ---------------------- #
 
+@app.route('/', methods=["GET"])
+@limiter.limit('100 per 1 hour')
+def index():
+    return render_template('index.html')
+
+
 def is_zip_valid(filepath):
     try:
         with zipfile.ZipFile(filepath, 'r') as zip_ref:
@@ -163,11 +169,11 @@ def upload_file():
 @limiter.limit("10 per 1 hour")
 def speedtest():
     _ = request.data
-    return "Speed test done"
+    return jsonify({"message": "speed test done"}), 200
 
 
 @app.route('/login', methods=['GET', 'POST'])
-@limiter.limit("10 per 1 hour")
+@limiter.limit("100 per 1 hour")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('command'))
@@ -194,7 +200,7 @@ def login():
             return render_template("login.html")
 
     # CAPTCHA Handling for GET request
-    safe_chars = 'abcdefghjkmnpqrsxyz'
+    safe_chars = 'ab23456'
     captcha_answer = ''.join(random.choices(safe_chars, k=4))
     session['captcha_answer'] = captcha_answer
 
