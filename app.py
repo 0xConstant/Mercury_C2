@@ -1,6 +1,6 @@
 from flask import (Flask, request, jsonify, Response, render_template,
                    send_file, send_from_directory, redirect, flash, url_for, session)
-import os, zipfile, random
+import os, zipfile, random, requests
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from os.path import getsize
@@ -40,9 +40,18 @@ class Agents(db.Model):
     local_ip = db.Column(db.String(80))
     local_groups = db.Column(db.String(80))
     ad_groups = db.Column(db.String(80))
+    email = db.Column(db.String(120))
     file_path = db.Column(db.String(500))
     agent_creation = db.Column(db.DateTime)
     file_addition = db.Column(db.DateTime)
+    # geolocation data
+    public_ip = db.Column(db.String(120))
+    city = db.Column(db.String(120))
+    region = db.Column(db.String(120))
+    country = db.Column(db.String(120))
+    postal = db.Column(db.String(120))
+    latitude = db.Column(db.String(120))
+    longitude = db.Column(db.String(120))
 
 
 class Administrator(db.Model, UserMixin):
@@ -60,9 +69,9 @@ class Administrator(db.Model, UserMixin):
         return True
 
 
-#with app.app_context():
+with app.app_context():
     #db.drop_all()
-    #db.create_all()
+    db.create_all()
 
 
 # ---------------------- Public Routes ---------------------- #
@@ -84,24 +93,59 @@ def is_zip_valid(filepath):
         return False
 
 
+def geolocation_id(ip):
+    location = {}
+    try:
+        url = f'https://ipapi.co/{ip}/json/'
+        resp = requests.get(url=url, timeout=10).json()
+        location = {
+            "public_ip": ip,
+            "city": resp.get("city"),
+            "region": resp.get("region"),
+            "country": resp.get("country_name"),
+            "postal": resp.get("postal"),
+            "latitude": resp.get("latitude"),
+            "longitude": resp.get("longitude"),
+        }
+    except: pass
+    return location
+
+
 @app.route('/add_agent', methods=['POST'])
 @limiter.limit("10 per 1 hour")
 def add_agent():
-    data = request.json
-    new_agent = Agents(
-        uid=data.get('uid', None),
-        hostname=data.get('hostname', None),
-        username=data.get('username', None),
-        fqdn=data.get('fqdn', None),
-        domain=data.get('domain', None),
-        local_ip=data.get('local_ip', None),
-        local_groups=data.get('local_groups', None),
-        ad_groups=data.get('ad_groups', None),
-        agent_creation=datetime.now().astimezone()
-    )
+    try:
+        if 'HTTP_X_FORWARDED_FOR' in request.environ:
+            user_ip = request.environ['HTTP_X_FORWARDED_FOR'].split(',')[0].strip()
+        else:
+            user_ip = request.remote_addr
+        geolocation = geolocation_id(user_ip)
+        data = request.json
 
-    db.session.add(new_agent)
-    db.session.commit()
+        new_agent = Agents(
+            uid=data.get('uid', None),
+            hostname=data.get('hostname', None),
+            username=data.get('username', None),
+            fqdn=data.get('fqdn', None),
+            domain=data.get('domain', None),
+            local_ip=data.get('local_ip', None),
+            local_groups=data.get('local_groups', None),
+            ad_groups=data.get('ad_groups', None),
+            email=data.get('email', None),
+            agent_creation=datetime.now().astimezone(),
+            public_ip=geolocation.get("public_ip", None),
+            city=geolocation.get("city", None),
+            region=geolocation.get("region", None),
+            country=geolocation.get("country", None),
+            postal=geolocation.get("postal", None),
+            latitude=geolocation.get("latitude", None),
+            longitude=geolocation.get("longitude", None),
+        )
+
+        db.session.add(new_agent)
+        db.session.commit()
+    except Exception as e:
+        app.logger.error(f"Error occurred: {e}")
 
     return jsonify({'message': 'created'}), 201
 

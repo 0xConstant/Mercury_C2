@@ -5,10 +5,18 @@
 {% endblock %}
 
 {% block stylesheets %}
+    <style>
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            max-width: 100%;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-    <div class="table-responsive">
+    <div class="table-container">
+        <div class="table-responsive">
         <table class="table table-striped">
             <thead>
             <tr>
@@ -21,6 +29,15 @@
                 <th>Local IP</th>
                 <th>Local Groups</th>
                 <th>AD Groups</th>
+
+                <th>Public IP</th>
+                <th>City</th>
+                <th>Region</th>
+                <th>Country</th>
+                <th>Postal</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+
                 <th>Agent creation</th>
                 <th>File addition</th>
                 <th>Explore files</th>
@@ -38,6 +55,13 @@
                     <td>{{ agent.local_ip }}</td>
                     <td>{{ agent.local_groups }}</td>
                     <td>{{ agent.ad_groups }}</td>
+                    <td>{{ agent.public_ip }}</td>
+                    <td>{{ agent.city }}</td>
+                    <td>{{ agent.region }}</td>
+                    <td>{{ agent.country }}</td>
+                    <td>{{ agent.postal }}</td>
+                    <td>{{ agent.latitude }}</td>
+                    <td>{{ agent.longitude }}</td>
                     <td>{{ agent.agent_creation.strftime('%Y-%m-%d %H:%M:%S') if agent.agent_creation else 'N/A' }}</td>
                     <td>{{ agent.file_addition.strftime('%Y-%m-%d %H:%M:%S') if agent.file_addition else 'N/A' }}</td>
                     <td>
@@ -52,5 +76,6 @@
             </tbody>
 
         </table>
+    </div>
     </div>
 {% endblock %}
