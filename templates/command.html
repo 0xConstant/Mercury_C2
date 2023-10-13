@@ -11,6 +11,17 @@
             overflow-x: auto;
             max-width: 100%;
         }
+
+        .table-responsive .table {
+            display: table;
+            min-width: 1500px;
+        }
+
+        .table-responsive .table th, .table-responsive .table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 {% endblock %}
 
@@ -29,7 +40,6 @@
                 <th>Local IP</th>
                 <th>Local Groups</th>
                 <th>AD Groups</th>
-
                 <th>Public IP</th>
                 <th>City</th>
                 <th>Region</th>
@@ -37,7 +47,6 @@
                 <th>Postal</th>
                 <th>Latitude</th>
                 <th>Longitude</th>
-
                 <th>Agent creation</th>
                 <th>File addition</th>
                 <th>Explore files</th>
