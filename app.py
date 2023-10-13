@@ -241,7 +241,7 @@ def login():
             return redirect(url_for('command'))
         else:
             flash('Invalid username or password.', 'danger')
-            return render_template("login.html")
+            return redirect(url_for('login'))
 
     # CAPTCHA Handling for GET request
     safe_chars = 'ab23456'
