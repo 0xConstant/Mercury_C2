@@ -382,7 +382,7 @@ def delete_agent(agent_id):
     else:
         flash('Error deleting agent.', 'danger')
 
-    return jsonify({"status": "done"})  # just to end the AJAX call
+    return jsonify({"status": "done"})
 
 
 @app.route('/logout')

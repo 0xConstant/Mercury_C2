@@ -82,11 +82,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if agent.file_path %}
-                            <button onclick="DeleteAgent({{ agent.id }})" class="btn btn-danger">Delete</button>
-                        {% else %}
-                            N/A
-                        {% endif %}
+                        <button onclick="DeleteAgent({{ agent.id }})" class="btn btn-danger">Delete</button>
                     </td>
                 </tr>
             {% endfor %}
