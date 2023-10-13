@@ -30,7 +30,7 @@
         <div class="table-responsive">
         <table class="table table-striped">
             <thead>
-            <tr>
+            <tr">
                 <th>ID</th>
                 <th>UID</th>
                 <th>Username</th>
@@ -83,7 +83,7 @@
                     </td>
                     <td>
                         {% if agent.file_path %}
-                            <a href="{{ url_for('delete_agent', agent_id=agent.id) }}" class="btn btn-danger">Delete</a>
+                            <button onclick="DeleteAgent({{ agent.id }})" class="btn btn-danger">Delete</button>
                         {% else %}
                             N/A
                         {% endif %}
@@ -95,4 +95,26 @@
         </table>
     </div>
     </div>
+    {% block scripts %}
+        <script>
+    function DeleteAgent(agentId) {
+    var confirmation = confirm("Do you really want to delete this agent? This will also delete associated files and cannot be undone.");
+
+    if (confirmation) {
+        $.ajax({
+            type: "GET",
+            url: "/delete_agent/" + agentId,
+            success: function(response) {
+                window.location.href = "/command"; // Redirect immediately regardless of success or failure
+            },
+            error: function(error) {
+                window.location.href = "/command"; // Redirect in case of any unexpected error
+            }
+        });
+    }
+}
+
+</script>
+
+    {% endblock %}
 {% endblock %}

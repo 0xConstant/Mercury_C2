@@ -371,16 +371,18 @@ def download_file(uid, subpath):
 def delete_agent(agent_id):
     agent = Agents.query.get(agent_id)
     if agent:
-        # Delete the agent's folder
+        # Delete the agent's folder if it exists
         folder_path = agent.file_path
-        if os.path.exists(folder_path):
+        if folder_path and os.path.exists(folder_path):
             shutil.rmtree(folder_path)
-
         # Delete the agent's entry from the database
         db.session.delete(agent)
         db.session.commit()
+        flash('Agent and associated data deleted successfully.', 'success')
+    else:
+        flash('Error deleting agent.', 'danger')
 
-    return redirect(url_for('command'))
+    return jsonify({"status": "done"})  # just to end the AJAX call
 
 
 @app.route('/logout')
