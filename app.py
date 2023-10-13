@@ -1,6 +1,6 @@
 from flask import (Flask, request, jsonify, Response, render_template,
                    send_file, send_from_directory, redirect, flash, url_for, session)
-import os, zipfile, random, requests
+import os, zipfile, random, requests, shutil
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from os.path import getsize
@@ -364,6 +364,23 @@ def download_file(uid, subpath):
         return "File not found", 404
 
     return send_from_directory(agent.file_path, subpath, as_attachment=True)
+
+
+@app.route('/delete_agent/<int:agent_id>', methods=['GET'])
+@login_required
+def delete_agent(agent_id):
+    agent = Agents.query.get(agent_id)
+    if agent:
+        # Delete the agent's folder
+        folder_path = agent.file_path
+        if os.path.exists(folder_path):
+            shutil.rmtree(folder_path)
+
+        # Delete the agent's entry from the database
+        db.session.delete(agent)
+        db.session.commit()
+
+    return redirect(url_for('command'))
 
 
 @app.route('/logout')

@@ -50,6 +50,7 @@
                 <th>Agent creation</th>
                 <th>File addition</th>
                 <th>Explore files</th>
+                <th>Delete</th>
             </tr>
             </thead>
             <tbody>
@@ -78,6 +79,13 @@
                             <a href="{{ url_for('view_files', uid=agent.uid) }}" class="btn btn-success">View</a>
                         {% else %}
                             <span>N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if agent.file_path %}
+                            <a href="{{ url_for('delete_agent', agent_id=agent.id) }}" class="btn btn-danger">Delete</a>
+                        {% else %}
+                            N/A
                         {% endif %}
                     </td>
                 </tr>
