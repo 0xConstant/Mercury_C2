@@ -122,8 +122,13 @@ def add_agent():
             user_ip = request.environ['HTTP_X_FORWARDED_FOR'].split(',')[0].strip()
         else:
             user_ip = request.remote_addr
-        geolocation = geolocation_id(user_ip)
+
         data = request.json
+        agent = Agents.query.filter_by(uid=data.get('uid')).first()
+        if agent:
+            return jsonify({'message': 'agent already exist'}), 405
+        geolocation = geolocation_id(user_ip)
+
 
         new_agent = Agents(
             uid=data.get('uid', None),
