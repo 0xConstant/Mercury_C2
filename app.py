@@ -131,6 +131,7 @@ def add_agent():
             hostname=data.get('hostname', None),
             username=data.get('username', None),
             local_ip=data.get('local_ip', None),
+            local_groups=data.get('local_groups', None),
             email=data.get('email', None),
             os_name=data.get('os_name', None),
             os_version=data.get('os_version', None),
