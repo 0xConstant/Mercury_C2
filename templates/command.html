@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block stylesheets %}
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet"/>
 
     <style>
         .table-container {
@@ -49,92 +49,92 @@
 
     <div class="table-container">
         <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>UID</th>
-                <th>Username</th>
-                <th>Hostname</th>
-                <th>Local IP</th>
-                <th>Local Groups</th>
-                <th>Email</th>
-                <th>OS Name</th>
-                <th>Version</th>
-                <th>OS Arch</th>
-                <th>Public IP</th>
-                <th>City</th>
-                <th>Region</th>
-                <th>Country</th>
-                <th>Postal</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Agent creation</th>
-                <th>File addition</th>
-                <th>Explore files</th>
-                <th>Delete</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for agent in agents %}
+            <table class="table table-striped">
+                <thead>
                 <tr>
-                    <td>{{ agent.id }}</td>
-                    <td>{{ agent.uid }}</td>
-                    <td>{{ agent.username }}</td>
-                    <td>{{ agent.hostname }}</td>
-                    <td>{{ agent.local_ip }}</td>
-                    <td>{{ agent.local_groups }}</td>
-                    <td>{{ agent.email }}</td>
-                    <td>{{ agent.os_name }}</td>
-                    <td>{{ agent.os_version }}</td>
-                    <td>{{ agent.os_arch }}</td>
-                    <td>{{ agent.public_ip }}</td>
-                    <td>{{ agent.city }}</td>
-                    <td>{{ agent.region }}</td>
-                    <td>{{ agent.country }}</td>
-                    <td>{{ agent.postal }}</td>
-                    <td>{{ agent.latitude }}</td>
-                    <td>{{ agent.longitude }}</td>
-                    <td>{{ agent.agent_creation.strftime('%Y-%m-%d %H:%M:%S') if agent.agent_creation else 'N/A' }}</td>
-                    <td>{{ agent.file_addition.strftime('%Y-%m-%d %H:%M:%S') if agent.file_addition else 'N/A' }}</td>
-                    <td>
-                        {% if agent.file_path %}
-                            <a href="{{ url_for('view_files', uid=agent.uid) }}" class="btn btn-success">View</a>
-                        {% else %}
-                            <span>N/A</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <button onclick="DeleteAgent({{ agent.id }})" class="btn btn-danger">Delete</button>
-                    </td>
+                    <th>ID</th>
+                    <th>UID</th>
+                    <th>Username</th>
+                    <th>Hostname</th>
+                    <th>Local IP</th>
+                    <th>Local Groups</th>
+                    <th>Email</th>
+                    <th>OS Name</th>
+                    <th>Version</th>
+                    <th>OS Arch</th>
+                    <th>Public IP</th>
+                    <th>City</th>
+                    <th>Region</th>
+                    <th>Country</th>
+                    <th>Postal</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Agent creation</th>
+                    <th>File addition</th>
+                    <th>Explore files</th>
+                    <th>Delete</th>
                 </tr>
-            {% endfor %}
-            </tbody>
+                </thead>
+                <tbody>
+                {% for agent in agents %}
+                    <tr>
+                        <td>{{ agent.id }}</td>
+                        <td>{{ agent.uid }}</td>
+                        <td>{{ agent.username }}</td>
+                        <td>{{ agent.hostname }}</td>
+                        <td>{{ agent.local_ip }}</td>
+                        <td>{{ agent.local_groups }}</td>
+                        <td>{{ agent.email }}</td>
+                        <td>{{ agent.os_name }}</td>
+                        <td>{{ agent.os_version }}</td>
+                        <td>{{ agent.os_arch }}</td>
+                        <td>{{ agent.public_ip }}</td>
+                        <td>{{ agent.city }}</td>
+                        <td>{{ agent.region }}</td>
+                        <td>{{ agent.country }}</td>
+                        <td>{{ agent.postal }}</td>
+                        <td>{{ agent.latitude }}</td>
+                        <td>{{ agent.longitude }}</td>
+                        <td>{{ agent.agent_creation.strftime('%Y-%m-%d %H:%M:%S') if agent.agent_creation else 'N/A' }}</td>
+                        <td>{{ agent.file_addition.strftime('%Y-%m-%d %H:%M:%S') if agent.file_addition else 'N/A' }}</td>
+                        <td>
+                            {% if agent.file_path %}
+                                <a href="{{ url_for('view_files', uid=agent.uid) }}" class="btn btn-success">View</a>
+                            {% else %}
+                                <span>N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button onclick="DeleteAgent({{ agent.id }})" class="btn btn-danger">Delete</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
 
-        </table>
-    </div>
+            </table>
+        </div>
     </div>
     {% block scripts %}
         <script>
-    function DeleteAgent(agentId) {
-    var confirmation = confirm("Do you really want to delete this agent? This will also delete associated files and cannot be undone.");
+            function DeleteAgent(agentId) {
+                var confirmation = confirm("Do you really want to delete this agent? This will also delete associated files and cannot be undone.");
 
-    if (confirmation) {
-        $.ajax({
-            type: "GET",
-            url: "/delete_agent/" + agentId,
-            success: function(response) {
-                window.location.href = "/command"; // Redirect immediately regardless of success or failure
-            },
-            error: function(error) {
-                window.location.href = "/command"; // Redirect in case of any unexpected error
+                if (confirmation) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/delete_agent/" + agentId,
+                        success: function (response) {
+                            window.location.href = "/command"; // Redirect immediately regardless of success or failure
+                        },
+                        error: function (error) {
+                            window.location.href = "/command"; // Redirect in case of any unexpected error
+                        }
+                    });
+                }
             }
-        });
-    }
-}
 
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
-</script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+        </script>
 
     {% endblock %}
 {% endblock %}
