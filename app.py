@@ -35,11 +35,7 @@ class Agents(db.Model):
     uid = db.Column(db.String(80))
     hostname = db.Column(db.String(80))
     username = db.Column(db.String(80))
-    fqdn = db.Column(db.String(80))
-    domain = db.Column(db.String(80))
     local_ip = db.Column(db.String(80))
-    local_groups = db.Column(db.String(80))
-    ad_groups = db.Column(db.String(80))
     email = db.Column(db.String(120))
     os_name = db.Column(db.String(80))
     os_version = db.Column(db.String(80))
@@ -134,11 +130,7 @@ def add_agent():
             uid=data.get('uid', None),
             hostname=data.get('hostname', None),
             username=data.get('username', None),
-            fqdn=data.get('fqdn', None),
-            domain=data.get('domain', None),
             local_ip=data.get('local_ip', None),
-            local_groups=data.get('local_groups', None),
-            ad_groups=data.get('ad_groups', None),
             email=data.get('email', None),
             os_name=data.get('os_name', None),
             os_version=data.get('os_version', None),
