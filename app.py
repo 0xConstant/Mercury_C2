@@ -36,6 +36,7 @@ class Agents(db.Model):
     hostname = db.Column(db.String(80))
     username = db.Column(db.String(80))
     local_ip = db.Column(db.String(80))
+    local_groups = db.Column(db.String(360))
     email = db.Column(db.String(120))
     os_name = db.Column(db.String(80))
     os_version = db.Column(db.String(80))
