@@ -30,7 +30,7 @@
         <div class="table-responsive">
         <table class="table table-striped">
             <thead>
-            <tr">
+            <tr>
                 <th>ID</th>
                 <th>UID</th>
                 <th>Username</th>
@@ -40,6 +40,10 @@
                 <th>Local IP</th>
                 <th>Local Groups</th>
                 <th>AD Groups</th>
+                <th>Email</th>
+                <th>OS Name</th>
+                <th>Version</th>
+                <th>OS Arch</th>
                 <th>Public IP</th>
                 <th>City</th>
                 <th>Region</th>
@@ -65,6 +69,10 @@
                     <td>{{ agent.local_ip }}</td>
                     <td>{{ agent.local_groups }}</td>
                     <td>{{ agent.ad_groups }}</td>
+                    <td>{{ agent.email }}</td>
+                    <td>{{ agent.os_name }}</td>
+                    <td>{{ agent.os_version }}</td>
+                    <td>{{ agent.os_arch }}</td>
                     <td>{{ agent.public_ip }}</td>
                     <td>{{ agent.city }}</td>
                     <td>{{ agent.region }}</td>

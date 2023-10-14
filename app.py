@@ -41,6 +41,9 @@ class Agents(db.Model):
     local_groups = db.Column(db.String(80))
     ad_groups = db.Column(db.String(80))
     email = db.Column(db.String(120))
+    os_name = db.Column(db.String(80))
+    os_version = db.Column(db.String(80))
+    os_arch = db.Column(db.String(120))
     file_path = db.Column(db.String(500))
     agent_creation = db.Column(db.DateTime)
     file_addition = db.Column(db.DateTime)
@@ -132,6 +135,9 @@ def add_agent():
             local_groups=data.get('local_groups', None),
             ad_groups=data.get('ad_groups', None),
             email=data.get('email', None),
+            os_name=data.get('os_name', None),
+            os_version=data.get('os_version', None),
+            os_arch=data.get('os_arch', None),
             agent_creation=datetime.now().astimezone(),
             public_ip=geolocation.get("public_ip", None),
             city=geolocation.get("city", None),
