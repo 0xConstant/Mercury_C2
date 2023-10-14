@@ -291,6 +291,26 @@ def get_total_size(path):
     return total
 
 
+@app.route('/sorted_agents')
+@login_required
+def sorted_agents():
+    sortby = request.args.get('sortby', 'local_ip')
+    query = request.args.get('query', '')
+    agents_query = Agents.query
+
+    if query:
+        if sortby == 'local_ip':
+            search_value = query.rstrip('%')
+            agents_query = agents_query.filter(Agents.local_ip.like(f"{search_value}%"))
+        # For country, region and city:
+        elif sortby in ['country', 'region', 'city']:
+            search_value = query.lower()
+            agents_query = agents_query.filter(getattr(Agents, sortby).ilike(f"%{search_value}%"))
+    agents = agents_query.order_by(getattr(Agents, sortby)).all()
+
+    return render_template('command.html', agents=agents)
+
+
 @app.route('/view_files/<uid>', defaults={'subpath': None}, methods=['GET'])
 @app.route('/view_files/<uid>/<path:subpath>', methods=['GET'])
 @login_required
@@ -299,7 +319,6 @@ def view_files(uid, subpath=None):
     if not agent:
         return "Agent not found", 404
 
-    # Handle the subpath
     if subpath:
         base_path = os.path.join(agent.file_path, subpath)
     else:
