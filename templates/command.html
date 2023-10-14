@@ -5,8 +5,6 @@
 {% endblock %}
 
 {% block stylesheets %}
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet"/>
-
     <style>
         .table-container {
             width: 100%;
@@ -124,16 +122,14 @@
                         type: "GET",
                         url: "/delete_agent/" + agentId,
                         success: function (response) {
-                            window.location.href = "/command"; // Redirect immediately regardless of success or failure
+                            window.location.href = "/command";
                         },
                         error: function (error) {
-                            window.location.href = "/command"; // Redirect in case of any unexpected error
+                            window.location.href = "/command";
                         }
                     });
                 }
             }
-
-            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
         </script>
 
     {% endblock %}
