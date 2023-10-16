@@ -11,6 +11,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
 
+# ---------------------- Flask configuration ---------------------- #
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app)
