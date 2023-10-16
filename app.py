@@ -250,8 +250,8 @@ def login():
             return redirect(url_for('login'))
 
     # CAPTCHA Handling for GET request
-    safe_chars = 'ab23456'
-    captcha_answer = ''.join(random.choices(safe_chars, k=4))
+    captcha_chars = 'ab23456'
+    captcha_answer = ''.join(random.choices(captcha_chars, k=4))
     session['captcha_answer'] = captcha_answer
 
     image_captcha = ImageCaptcha()
