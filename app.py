@@ -152,6 +152,7 @@ def add_agent():
         db.session.commit()
     except Exception as e:
         app.logger.error(f"Error occurred: {e}")
+        db.session.rollback()
 
     return jsonify({'message': 'created'}), 201
 
