@@ -124,9 +124,8 @@ def add_agent():
         data = request.json
         agent = Agents.query.filter_by(uid=data.get('uid')).first()
         if agent:
-            return jsonify({'message': 'agent already exist'}), 405
+            return jsonify({'message': 'agent already exist'}), 400
         geolocation = geolocation_id(user_ip)
-
 
         new_agent = Agents(
             uid=data.get('uid', None),
@@ -301,6 +300,7 @@ def sorted_agents():
     agents_query = Agents.query
 
     if query:
+        # sorting by local IP
         if sortby == 'local_ip':
             search_value = query.rstrip('%')
             agents_query = agents_query.filter(Agents.local_ip.like(f"{search_value}%"))
