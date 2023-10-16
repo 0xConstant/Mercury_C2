@@ -33,7 +33,7 @@ limiter = Limiter(
 
 class Agents(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    uid = db.Column(db.String(80))
+    uid = db.Column(db.String(80), unique=True)
     hostname = db.Column(db.String(80))
     username = db.Column(db.String(80))
     local_ip = db.Column(db.String(80))
