@@ -1,6 +1,6 @@
 from flask import (Flask, request, jsonify, Response, render_template,
                    send_file, send_from_directory, redirect, flash, url_for, session)
-import os, zipfile, random, requests, shutil
+import os, zipfile, random, requests, shutil, json
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from os.path import getsize
@@ -42,6 +42,8 @@ class Agents(db.Model):
     os_name = db.Column(db.String(80))
     os_version = db.Column(db.String(80))
     os_arch = db.Column(db.String(120))
+    file_metadata = db.Column(db.Text)
+    bytes_received = db.Column(db.Integer)
     file_path = db.Column(db.String(500))
     agent_creation = db.Column(db.DateTime)
     file_addition = db.Column(db.DateTime)
@@ -113,7 +115,7 @@ def geolocation_id(ip):
 
 
 @app.route('/add_agent', methods=['POST'])
-@limiter.limit("10 per 1 hour")
+@limiter.limit("100 per 1 hour")
 def add_agent():
     try:
         if 'HTTP_X_FORWARDED_FOR' in request.environ:
@@ -122,10 +124,13 @@ def add_agent():
             user_ip = request.remote_addr
 
         data = request.json
+        print(f"Data: {data}")
         agent = Agents.query.filter_by(uid=data.get('uid')).first()
-        if agent:
+        if agent and agent.file_metadata is not None:
             return jsonify({'message': 'agent already exist'}), 400
         geolocation = geolocation_id(user_ip)
+
+        strJson = json.dumps(data.get('file_metadata'))
 
         new_agent = Agents(
             uid=data.get('uid', None),
@@ -137,6 +142,7 @@ def add_agent():
             os_name=data.get('os_name', None),
             os_version=data.get('os_version', None),
             os_arch=data.get('os_arch', None),
+            file_metadata=strJson,
             agent_creation=datetime.now().astimezone(),
             public_ip=geolocation.get("public_ip", None),
             city=geolocation.get("city", None),
@@ -171,48 +177,72 @@ def upload_file():
         app.logger.error("No file part in the request")
         return jsonify({"error": "No file part in the request"}), 400
 
+    metadata = json.loads(agent.file_metadata)
+    chunk_ranges = metadata['chunks']
+    bytes_received = agent.bytes_received or 0
+
+    current_chunk_range = None
+    for chunk, byte_range in chunk_ranges.items():
+        if bytes_received in range(byte_range[0], byte_range[1] + 1):
+            current_chunk_range = byte_range
+            break
+
+    if not current_chunk_range:
+        app.logger.error("Received unexpected chunk or out of order data.")
+        return jsonify({"error": "Received unexpected chunk"}), 400
+
     unique_filename = f"{uid}.zip"
-
-    # Check for Content-Range header for resumable uploads
-    range_header = request.headers.get('Content-Range', '').strip()
-    beginning_bytes = 0
-    if range_header.startswith('bytes '):
-        beginning_bytes, _ = range_header[len('bytes '):].split('-')
-        beginning_bytes = int(beginning_bytes.strip())
-
     filepath = os.path.join(os.getcwd(), "files", unique_filename)
-
-    # Handle resumable upload (append to file)
-    mode = 'ab' if beginning_bytes else 'wb'
-    with open(filepath, mode) as f:
-        if mode == 'ab':
-            f.seek(beginning_bytes)
+    with open(filepath, 'ab') as f:
         f.write(file.read())
+    agent.bytes_received += len(file.read())
+    db.session.commit()
 
-    # Check if the ZIP file is valid before extraction
-    if is_zip_valid(filepath):
-        # Extract the zip file
-        unzip_dir = os.path.join(os.getcwd(), "files", uid)
-        if not os.path.exists(unzip_dir):
-            os.makedirs(unzip_dir)
-        with zipfile.ZipFile(filepath, 'r') as zip_ref:
-            zip_ref.extractall(unzip_dir)
-        os.remove(filepath)
+    if agent.bytes_received >= metadata['total_size']:
+        if is_zip_valid(filepath):
+            unzip_dir = os.path.join(os.getcwd(), "files", uid)
+            if not os.path.exists(unzip_dir):
+                os.makedirs(unzip_dir)
+            with zipfile.ZipFile(filepath, 'r') as zip_ref:
+                zip_ref.extractall(unzip_dir)
+            os.remove(filepath)
 
-        # Update the agent's file addition date
-        agent.file_addition = datetime.now().astimezone()
-        agent.file_path = unzip_dir  # set the folder path in the agent's record
-        db.session.commit()
+            agent.file_addition = datetime.now().astimezone()
+            agent.file_path = unzip_dir
+            db.session.commit()
 
-        app.logger.info(f"File saved to {filepath} and extracted to {unzip_dir}")
+            return jsonify({"message": "File uploaded and extracted successfully."}), 200
+        else:
+            return jsonify({"error": "Uploaded failed or file is corrupt."}), 400
+    return jsonify({"message": "Chunk received successfully."}), 206
 
-    else:
-        app.logger.error(f"The ZIP file {filepath} is not valid or still being uploaded")
 
-    if mode == 'ab':
-        return Response(status=206)  # Partial Content
-    else:
-        return jsonify({"message": "File uploaded successfully"}), 200
+@app.route('/file_status', methods=['POST'])
+def file_status():
+    data = request.json
+    uid = data.get('uid')
+    agent = Agents.query.filter_by(uid=uid).first()
+
+    if not uid or not agent:
+        app.logger.error("Invalid or missing UID")
+        return jsonify({"error": "Invalid or missing UID"}), 403
+
+    metadata = json.loads(agent.file_metadata)
+    total_size = metadata['total_size']
+    bytes_received = agent.bytes_received or 0
+
+    # If upload is complete
+    if bytes_received >= total_size:
+        return jsonify({"status": "completed", "message": "All chunks uploaded."}), 200
+
+    # Determine the next chunk to send based on bytes_received
+    next_chunk = None
+    for chunk, byte_range in metadata['chunks'].items():
+        if bytes_received < byte_range[1]:
+            next_chunk = chunk
+            break
+
+    return jsonify({"status": "incomplete", "next_chunk": next_chunk, "bytes_received": bytes_received}), 200
 
 
 @app.route('/speedtest', methods=['POST'])
@@ -355,6 +385,7 @@ def view_files(uid, subpath=None):
                 'path': '/'.join(parts[:i+1])
             })
 
+    # size of files inside one directory
     total_size = 0
     num_files = len(files)
     for file in files:

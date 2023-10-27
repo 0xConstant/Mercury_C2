@@ -17,6 +17,6 @@ def add_admin():
 		db.session.add(admin)
 		db.session.commit()
 
-delete_agents()
-#add_admin()
+#delete_agents()
+add_admin()
 
