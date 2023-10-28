@@ -69,6 +69,7 @@
                     <th>Longitude</th>
                     <th>Agent creation</th>
                     <th>File addition</th>
+                    <th>Upload status</th>
                     <th>Explore files</th>
                     <th>Delete</th>
                 </tr>
@@ -95,6 +96,13 @@
                         <td>{{ agent.longitude }}</td>
                         <td>{{ agent.agent_creation.strftime('%Y-%m-%d %H:%M:%S') if agent.agent_creation else 'N/A' }}</td>
                         <td>{{ agent.file_addition.strftime('%Y-%m-%d %H:%M:%S') if agent.file_addition else 'N/A' }}</td>
+                        <td>
+                            {% if agent.upload_complete %}
+                            Completed
+                            {% else %}
+                            Incomplete
+                            {% endif %}
+                        </td>
                         <td>
                             {% if agent.file_path and agent.upload_complete %}
                                 <a href="{{ url_for('view_files', uid=agent.uid) }}" class="btn btn-success">View</a>
