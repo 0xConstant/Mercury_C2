@@ -450,7 +450,7 @@ def download_file(uid, subpath):
 
     file_path = os.path.join(agent.file_path, subpath)
     if not os.path.exists(file_path):
-        return "File or directory not found", 404
+        return jsonify({"error": "File or directory not found"}), 404
 
     # If it's a file, download as attachment
     if os.path.isfile(file_path):
@@ -473,9 +473,49 @@ def download_file(uid, subpath):
             return response
 
         return send_file(zip_path, as_attachment=True, download_name=zip_name)
+    return jsonify({"error": "Unexpected error"}), 500
 
-    # Should not reach here, but just in case
-    return "Unexpected error", 500
+
+@app.route('/download_agent/<uid>')
+@login_required
+def download_agent(uid):
+    agent = Agents.query.filter_by(uid=uid).first()
+    if not agent:
+        return "Agent not found", 404
+
+    file_path = agent.file_path
+
+    if not os.path.isdir(file_path):
+        return "Directory not found", 404
+
+    # Name the zip file after the agent's UID
+    zip_name = f"{agent.uid}.zip"
+    # Create a temporary directory to store the zip file
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, zip_name)
+
+    # Render the HTML template with the agent details
+    agent_details_html = render_template('agent_details.html', agent=agent)
+    # Write the HTML content to a file in the temp directory
+    details_file_path = os.path.join(temp_dir, 'agent_details.html')
+    with open(details_file_path, 'w') as f:
+        f.write(agent_details_html)
+
+    # Add the HTML file to the existing file_path before zipping
+    shutil.copy(details_file_path, os.path.join(file_path, 'agent_details.html'))
+
+    # Create the zip file including the agent_details.html
+    shutil.make_archive(zip_path.replace('.zip', ''), 'zip', file_path)
+
+    # Clean up the HTML file added in the agent's file_path
+    os.remove(os.path.join(file_path, 'agent_details.html'))
+
+    @after_this_request
+    def cleanup(response):
+        shutil.rmtree(temp_dir)
+        return response
+
+    return send_file(zip_path, as_attachment=True, download_name=zip_name)
 
 
 @app.route('/delete_agent/<int:agent_id>', methods=['GET'])

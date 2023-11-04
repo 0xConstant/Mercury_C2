@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Agent Details - {{ agent.uid }}</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<h1>Agent Details - {{ agent.uid }}</h1>
+<table>
+    <tr>
+        <th>ID</th>
+        <td>{{ agent.id }}</td>
+    </tr>
+    <tr>
+        <th>UID</th>
+        <td>{{ agent.uid }}</td>
+    </tr>
+    <tr>
+        <th>Hostname</th>
+        <td>{{ agent.hostname }}</td>
+    </tr>
+    <tr>
+        <th>Username</th>
+        <td>{{ agent.username }}</td>
+    </tr>
+    <tr>
+        <th>Local IP</th>
+        <td>{{ agent.local_ip }}</td>
+    </tr>
+    <tr>
+        <th>Local Groups</th>
+        <td>{{ agent.local_groups }}</td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td>{{ agent.email }}</td>
+    </tr>
+    <tr>
+        <th>Operating System Name</th>
+        <td>{{ agent.os_name }}</td>
+    </tr>
+    <tr>
+        <th>Operating System Version</th>
+        <td>{{ agent.os_version }}</td>
+    </tr>
+    <tr>
+        <th>Operating System Architecture</th>
+        <td>{{ agent.os_arch }}</td>
+    </tr>
+    <tr>
+        <th>Bytes Received</th>
+        <td>{{ agent.bytes_received }}</td>
+    </tr>
+    <tr>
+        <th>File Path</th>
+        <td>{{ agent.file_path }}</td>
+    </tr>
+    <tr>
+        <th>Agent Creation Date</th>
+        <td>{{ agent.agent_creation.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+    </tr>
+    <tr>
+        <th>File Addition Date</th>
+        <td>{{ agent.file_addition.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+    </tr>
+    <tr>
+        <th>Upload Complete</th>
+        <td>{{ agent.upload_complete }}</td>
+    </tr>
+    <tr>
+        <th>Public IP</th>
+        <td>{{ agent.public_ip }}</td>
+    </tr>
+    <tr>
+        <th>City</th>
+        <td>{{ agent.city }}</td>
+    </tr>
+    <tr>
+        <th>Region</th>
+        <td>{{ agent.region }}</td>
+    </tr>
+    <tr>
+        <th>Country</th>
+        <td>{{ agent.country }}</td>
+    </tr>
+    <tr>
+        <th>Postal Code</th>
+        <td>{{ agent.postal }}</td>
+    </tr>
+    <tr>
+        <th>Latitude</th>
+        <td>{{ agent.latitude }}</td>
+    </tr>
+    <tr>
+        <th>Longitude</th>
+        <td>{{ agent.longitude }}</td>
+    </tr>
+</table>
+</body>
+</html>

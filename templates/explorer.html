@@ -15,10 +15,9 @@
                 <th>ID</th>
                 <th>UID</th>
                 <th>Hostname</th>
-                <th>Domain</th>
-                <th>File path</th>
                 <th>Total files</th>
                 <th>Total size</th>
+                <th>Download Agent</th>
             </tr>
             </thead>
             <tbody>
@@ -26,10 +25,17 @@
                 <td>{{ agent.id }}</td>
                 <td>{{ agent.uid }}</td>
                 <td>{{ agent.hostname }}</td>
-                <td>{{ agent.domain }}</td>
-                <td>{{ agent.file_path }}</td>
                 <td>{{ total_num_files }}</td>
                 <td>{{ base_size|filesizeformat }}</td>
+                <td>
+                    {% if agent.file_path and agent.upload_complete %}
+                        <a href="{{ url_for('download_agent', uid=agent.uid) }}" class="btn btn-primary btn-sm float-right">
+                            <i class="fa fa-download"></i> Download
+                        </a>
+                    {% else %}
+                        <span>N/A</span>
+                    {% endif %}
+                </td>
             </tr>
             </tbody>
         </table>
@@ -65,7 +71,8 @@
                         <i class="fas fa-folder"></i>
                         {{ dir }}
                     </a>
-                    <a href="{{ url_for('download_file', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + dir) }}" class="btn btn-primary btn-sm float-right">
+                    <a href="{{ url_for('download_file', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + dir) }}"
+                       class="btn btn-primary btn-sm float-right">
                         <i class="fa fa-download"></i> Download
                     </a>
                 </li>
