@@ -65,6 +65,9 @@
                         <i class="fas fa-folder"></i>
                         {{ dir }}
                     </a>
+                    <a href="{{ url_for('download_file', uid=agent.uid, subpath=(subpath + '/' if subpath else '') + dir) }}" class="btn btn-primary btn-sm float-right">
+                        <i class="fa fa-download"></i> Download
+                    </a>
                 </li>
             {% endfor %}
         </ul>

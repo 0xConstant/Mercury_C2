@@ -1,6 +1,7 @@
 from flask import (Flask, request, jsonify, render_template,
-                   send_file, send_from_directory, redirect, flash, url_for, session)
-import os, zipfile, random, requests, shutil, json, base64
+                   send_file, send_from_directory, redirect,
+                   flash, url_for, session, after_this_request)
+import os, zipfile, random, requests, shutil, json, base64, tempfile
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from os.path import getsize
@@ -449,9 +450,32 @@ def download_file(uid, subpath):
 
     file_path = os.path.join(agent.file_path, subpath)
     if not os.path.exists(file_path):
-        return "File not found", 404
+        return "File or directory not found", 404
 
-    return send_from_directory(agent.file_path, subpath, as_attachment=True)
+    # If it's a file, download as attachment
+    if os.path.isfile(file_path):
+        return send_from_directory(agent.file_path, subpath, as_attachment=True)
+
+    # If it's a directory, zip it before sending
+    if os.path.isdir(file_path):
+        # Create a temporary file to store the zip archive
+        temp_dir = tempfile.mkdtemp()
+        zip_name = os.path.basename(subpath) + '.zip'
+        zip_path = os.path.join(temp_dir, zip_name)
+
+        # Zip the directory
+        shutil.make_archive(zip_path.replace('.zip', ''), 'zip', file_path)
+
+        # Ensure the temp file is removed after sending the zip file
+        @after_this_request
+        def cleanup(response):
+            shutil.rmtree(temp_dir)
+            return response
+
+        return send_file(zip_path, as_attachment=True, download_name=zip_name)
+
+    # Should not reach here, but just in case
+    return "Unexpected error", 500
 
 
 @app.route('/delete_agent/<int:agent_id>', methods=['GET'])
