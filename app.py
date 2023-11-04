@@ -395,6 +395,7 @@ def view_files(uid, subpath=None):
         # If base_path is a file, send it for viewing
         return send_file(base_path, mimetype='text/plain')
 
+
     files = []
     directories = []
 
