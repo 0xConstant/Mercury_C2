@@ -111,7 +111,11 @@
                             {% endif %}
                         </td>
                         <td>
+                            {% if agent.file_path and agent.upload_complete %}
                             <button onclick="DeleteAgent({{ agent.id }})" class="btn btn-danger">Delete</button>
+                            {% else %}
+                                <span>N/A</span>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
