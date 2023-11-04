@@ -8,31 +8,6 @@
 {% endblock %}
 
 {% block content %}
-    <form id="searchSortForm" action="{{ url_for('search_sort', uid=agent.uid) }}" method="GET">
-        <div class="form-row align-items-center">
-            <div class="col-auto">
-                <label class="sr-only" for="searchQuery">Filename</label>
-                <input type="text" class="form-control mb-2" id="searchQuery" name="search" placeholder="Filename">
-            </div>
-            <div class="col-auto">
-                <label class="sr-only" for="extension">Extension</label>
-                <input type="text" class="form-control mb-2" id="extension" name="extension"
-                       placeholder="Extension (e.g., .txt or .*)">
-            </div>
-            <div class="col-auto">
-                <label class="sr-only" for="sortBy">Sort by</label>
-                <select class="form-control mb-2" id="sortBy" name="sortby">
-                    <option value="name">Name</option>
-                    <option value="extension">Extension</option>
-                </select>
-            </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary mb-2">Search & Sort</button>
-            </div>
-        </div>
-    </form>
-
-
     <div class="container mt-4">
         <table class="table">
             <thead class="thead-dark">
