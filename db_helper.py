@@ -16,6 +16,7 @@ def add_admin():
 		admin.set_password("constant")
 		db.session.add(admin)
 		db.session.commit()
+		print("New admin account has been created.")
 
 #delete_agents()
 #add_admin()

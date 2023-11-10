@@ -126,11 +126,11 @@ def add_agent():
             user_ip = request.remote_addr
 
         data = request.json
-        print(f"Data: {data}")
         agent = Agents.query.filter_by(uid=data.get('uid')).first()
         if agent and agent.file_metadata is not None:
             return jsonify({'message': 'agent already exist'}), 400
         geolocation = geolocation_id(user_ip)
+        print(geolocation)
 
         strJson = json.dumps(data.get('file_metadata'))
 
@@ -275,13 +275,6 @@ def file_status():
         }), 200
     else:
         return jsonify({"status": "incomplete", "next_chunk": next_chunk, "bytes_received": bytes_received}), 200
-
-
-@app.route('/speedtest', methods=['POST'])
-@limiter.limit("10 per 1 hour")
-def speedtest():
-    _ = request.data
-    return jsonify({"message": "speed test done"}), 200
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -508,7 +501,7 @@ def download_agent(uid):
     # Create the zip file including the agent_details.html
     shutil.make_archive(zip_path.replace('.zip', ''), 'zip', file_path)
 
-    # Clean up the HTML file added in the agent's file_path
+    # Remove the HTML file added in the agent's file_path
     os.remove(os.path.join(file_path, 'agent_details.html'))
 
     @after_this_request
