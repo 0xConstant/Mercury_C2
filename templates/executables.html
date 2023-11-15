@@ -11,7 +11,42 @@
 {% endblock %}
 
 {% block content %}
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Filename</th>
+                    <th>Description</th>
+                    <th>Creation date</th>
+                    <th>Modification date</th>
+                    <th>Download link</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for exe in executables %}
+                    <tr>
+                        <td>{{ exe.id }}</td>
+                        <td>{{ exe.filename }}</td>
+                        <td>{{ exe.description }}</td>
+                        <td>{{ exe.creation_date }}</td>
+                        <td>{{ exe.modification_date }}</td>
+                        <td>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</td>
+                        <td>
+                            <a href="" class="btn btn-success">Edit</a>
+                            <a href="" class="btn btn-success">Download</a>
+                            <a href="" class="btn btn-success">Replace</a>
+                            <a href="" class="btn btn-success">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
 
+            </table>
+        </div>
+    </div>
 {% endblock %}
 
 

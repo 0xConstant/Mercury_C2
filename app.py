@@ -75,10 +75,11 @@ class Administrator(db.Model, UserMixin):
         return True
 
 
-class Executable(db.Model):
+class Executables(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=True)
+    binary_data = db.Column(db.LargeBinary, nullable=False)
     creation_date = db.Column(db.DateTime, default=datetime.now().astimezone())
     modification_date = db.Column(db.DateTime)
 
@@ -566,7 +567,8 @@ def get_agents():
 
 @app.route('/executables', methods=['GET', 'POST'])
 def executables():
-    return render_template('executables.html', active='executables')
+    execs = Executables.query.all()
+    return render_template('executables.html', active='executables', executables=execs)
 
 
 @app.route('/logout')
