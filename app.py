@@ -75,6 +75,14 @@ class Administrator(db.Model, UserMixin):
         return True
 
 
+class Executable(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    creation_date = db.Column(db.DateTime, default=datetime.now().astimezone())
+    modification_date = db.Column(db.DateTime)
+
+
 with app.app_context():
     #db.drop_all()
     db.create_all()
@@ -545,7 +553,7 @@ def agent_map():
     city_counts = Counter(agent.city for agent in agents if agent.city)
     sorted_cities = sorted(city_counts.items(), key=lambda item: item[1], reverse=True)
 
-    return render_template("map.html", countries=sorted_countries, cities=sorted_cities)
+    return render_template("map.html", countries=sorted_countries, cities=sorted_cities, active='agent_map')
 
 
 @app.route('/get_agents', methods=['GET'])
@@ -554,6 +562,11 @@ def get_agents():
     agents = Agents.query.all()
     agent_list = [{'hostname': agent.hostname, 'latitude': agent.latitude, 'longitude': agent.longitude} for agent in agents]
     return jsonify(agent_list)
+
+
+@app.route('/executables', methods=['GET', 'POST'])
+def executables():
+    return render_template('executables.html', active='executables')
 
 
 @app.route('/logout')

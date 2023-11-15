@@ -11,6 +11,12 @@
         body {
             background-color: #f3f3f3;
         }
+
+        .navbar .nav-item.active .nav-link {
+            color: #ffffff;
+            background-color: #000;
+            border-radius: 60px;
+        }
     </style>
     {% block stylesheets %}{% endblock %}
     <title>{% block title %}{% endblock %} - Mercury</title>
@@ -34,6 +40,9 @@
             </li>
             <li class="nav-item {{ 'active' if active == 'agent_map' else '' }}">
                 <a class="nav-link" href="{{ url_for('agent_map') }}">Map</a>
+            </li>
+            <li class="nav-item {{ 'active' if active == 'executables' else '' }}">
+                <a class="nav-link" href="{{ url_for('executables') }}">Executables</a>
             </li>
             <li class="nav-item {{ 'active' if active == 'logout' else '' }}">
                 <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
