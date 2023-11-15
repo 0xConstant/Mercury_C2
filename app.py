@@ -542,7 +542,10 @@ def agent_map():
     country_counts = Counter(agent.country for agent in agents if agent.country)
     sorted_countries = sorted(country_counts.items(), key=lambda item: item[1], reverse=True)
 
-    return render_template("map.html", countries=sorted_countries)
+    city_counts = Counter(agent.city for agent in agents if agent.city)
+    sorted_cities = sorted(city_counts.items(), key=lambda item: item[1], reverse=True)
+
+    return render_template("map.html", countries=sorted_countries, cities=sorted_cities)
 
 
 @app.route('/get_agents', methods=['GET'])

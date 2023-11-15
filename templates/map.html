@@ -19,25 +19,53 @@
     <div id="map"></div>
     <br><br>
     <div class="table-container">
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Country</th>
-                    <th>Agents</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {% for country, count in countries %}
+        <div class="row">
+            <!-- Table for Countries -->
+            <div class="col-md-6">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
                         <tr>
-                            <td>{{ country }}</td>
-                            <td>{{ count }}</td>
+                            <th>Country</th>
+                            <th>Agents</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </thead>
+                        <tbody>
+                        {% for country, count in countries %}
+                            <tr>
+                                <td>{{ country }}</td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Table for Cities -->
+            <div class="col-md-6">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>City</th>
+                            <th>Agents</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for city, count in cities %}
+                            <tr>
+                                <td>{{ city }}</td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
+
 {% endblock %}
 
 
