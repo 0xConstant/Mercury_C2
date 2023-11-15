@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from captcha.image import ImageCaptcha
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from collections import Counter
 
 
 # ---------------------- Flask configuration ---------------------- #
@@ -255,10 +256,13 @@ def file_status():
     if bytes_received >= total_size:
         return jsonify({"status": "completed", "message": "All chunks uploaded."}), 200
 
+    # Sort the chunks by their numerical key value:
+    sorted_chunks = sorted(metadata['chunks'].items(), key=lambda x: int(x[0]))
+
     # Determine the next chunk to send based on bytes_received:
     next_chunk = None
     next_chunk_range = None
-    for chunk, byte_range in metadata['chunks'].items():
+    for chunk, byte_range in sorted_chunks:
         if bytes_received < byte_range[1]:
             next_chunk = chunk
             next_chunk_range = byte_range
@@ -529,6 +533,24 @@ def delete_agent(agent_id):
         flash('Error deleting agent.', 'danger')
 
     return jsonify({"status": "done"})
+
+
+@app.route('/map', methods=['GET'])
+@login_required
+def agent_map():
+    agents = Agents.query.all()
+    country_counts = Counter(agent.country for agent in agents if agent.country)
+    sorted_countries = sorted(country_counts.items(), key=lambda item: item[1], reverse=True)
+
+    return render_template("map.html", countries=sorted_countries)
+
+
+@app.route('/get_agents', methods=['GET'])
+@login_required
+def get_agents():
+    agents = Agents.query.all()
+    agent_list = [{'hostname': agent.hostname, 'latitude': agent.latitude, 'longitude': agent.longitude} for agent in agents]
+    return jsonify(agent_list)
 
 
 @app.route('/logout')
