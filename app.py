@@ -375,8 +375,6 @@ def downloads(filename):
 
 
 # ---------------------- Protected Routes ---------------------- #
-
-
 def disk_usage():
     current_directory = os.path.dirname(os.path.abspath(__file__))
     files_dir = os.path.join(current_directory, 'files')
