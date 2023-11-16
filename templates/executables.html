@@ -97,6 +97,71 @@
     </div>
 
 
+    <!-- Edit Exe Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Executable</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="exeEditForm">
+                        <!-- Filename field with counter -->
+                        <div class="form-group">
+                            <label for="editFilename">Filename (will be saved as .exe):</label>
+                            <input type="text" class="form-control" id="editFilename" name="editFilename"
+                                   placeholder="Enter filename (without .exe)" maxlength="32"
+                                   oninput="updateCounter(this, 'editFilename-counter')">
+                            <small id="editFilename-counter" class="form-text text-muted">0/32</small>
+                        </div>
+
+                        <!-- Description field with counter -->
+                        <div class="form-group">
+                            <label for="editDescription">Description:</label>
+                            <textarea class="form-control" id="editDescription" name="editDescription" rows="2"
+                                      placeholder="Enter description"
+                                      maxlength="1000"
+                                      oninput="updateCounter2(this, 'editDescription-counter')"></textarea>
+                            <small id="editDescription-counter" class="form-text text-muted">0/1000</small>
+                        </div>
+
+                        <!-- Public selection field -->
+                        <div class="form-group">
+                            <label for="editPublic">Public:</label>
+                            <select class="form-control" id="editPublic" name="editPublic">
+                                <option value="True">True</option>
+                                <option value="False">False</option>
+                            </select>
+                        </div>
+
+                        <!-- File input field -->
+                        <div class="form-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="editExeFileUpload" name="editFile"
+                                       accept=".exe">
+                                <label class="custom-file-label" for="editExeFileUpload">Choose file</label>
+                            </div>
+                        </div>
+
+                        <!-- Submit button -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
     <div class="table-container">
         <div class="table-responsive">
             <table class="table table-striped">
@@ -121,7 +186,13 @@
                         <td>{{ exe.creation_date }}</td>
                         <td>{{ exe.modification_date }}</td>
                         <td>
-                            <a href="" class="btn btn-info">Edit</a>
+                            <button class="btn btn-info edit-btn" data-target="#editModal" data-toggle="modal"
+                                    data-executable-id="{{ exe.id }}"
+                                    data-filename="{{ exe.filename }}" data-description="{{ exe.description }}"
+                                    data-public="{{ 'True' if exe.public else 'False' }}">
+                                Edit
+                            </button>
+
                             <button onclick="DeleteExecutable({{ exe.id }})" class="btn btn-danger">Delete</button>
                         </td>
                         <td>{{ exe.public }}</td>
@@ -228,6 +299,19 @@
             }
         }
 
+        $('.edit-btn').on('click', function () {
+            // Extract values from data attributes
+            var executableId = $(this).data('executable-id');
+            var filename = $(this).data('filename');
+            var description = $(this).data('description');
+            var isPublic = $(this).data('public');
+
+            // Populate the form fields in the modal
+            $('#editFilename').val(filename);
+            $('#editDescription').val(description);
+            $('#editPublic').val(isPublic);
+
+        });
 
     </script>
 {% endblock %}

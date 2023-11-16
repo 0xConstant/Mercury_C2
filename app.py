@@ -648,6 +648,32 @@ def delete_exe(exe_id):
     return jsonify({"status": "done"})
 
 
+@app.route('/edit_executable/<int:executable_id>', methods=['POST'])
+@login_required
+def edit_executable(executable_id):
+    exec = Executables.query.get_or_404(executable_id)
+
+    if request.method == 'POST':
+        file = request.files.get('editFile')
+        filename = secure_filename(request.form.get('editFilename', '')) + '.exe'
+        description = request.form.get('editDescription', '')
+        public_value = request.form.get('editPublic', 'False')
+        public = True if public_value == 'True' else False
+
+        # Update the Executables object
+        exec.filename = filename if filename else exec.filename
+        exec.description = description if description else exec.description
+        exec.public = public
+
+        if file and allowed_file(filename):
+            binary_data = file.read()
+            exec.binary_data = binary_data
+
+        db.session.commit()
+
+        return jsonify({'message': 'Executable updated successfully', 'id': exec.id}), 200
+
+
 @app.route('/logout')
 @login_required
 def logout():
