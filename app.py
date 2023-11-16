@@ -344,7 +344,53 @@ def ratelimit_error(e):
     return jsonify(error="ratelimit exceeded", message=str(e.description)), 429
 
 
+@app.route('/download/<filename>', methods=['GET'])
+def downloads(filename):
+    # Check if the file exists.
+    executable = Executables.query.filter_by(filename=filename).first()
+
+    # If no file was found, return a 404 response.
+    if not executable:
+        return jsonify({"error": "Executable not found"}), 404
+
+    # If the file is public, provide it for download.
+    if executable.public:
+        return Response(
+            executable.binary_data,
+            mimetype="application/octet-stream",
+            headers={"Content-Disposition": f"attachment;filename={filename}"}
+        )
+
+    # If the file is private and the user is not authenticated, return a 403 response.
+    elif not executable.public and not current_user.is_authenticated:
+        return jsonify({"error": "You are not authorized to access this object."}), 403
+
+    # If the file is private and the user is authenticated, provide it for download.
+    elif not executable.public and current_user.is_authenticated:
+        return Response(
+            executable.binary_data,
+            mimetype="application/octet-stream",
+            headers={"Content-Disposition": f"attachment;filename={filename}"}
+        )
+
+
 # ---------------------- Protected Routes ---------------------- #
+
+
+def disk_usage():
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    files_dir = os.path.join(current_directory, 'files')
+    total, used, free = shutil.disk_usage(files_dir)
+    total_gb = round(total / (2 ** 30), 2)
+    free_gb = round(free / (2 ** 30), 2)
+    return total_gb, free_gb
+
+
+@app.context_processor
+def context_processor():
+    total_space, free_space = disk_usage()
+    return dict(total_space=total_space, free_space=free_space)
+
 
 @app.route('/command')
 @login_required
@@ -603,36 +649,6 @@ def executables():
 
     execs = Executables.query.all()
     return render_template('executables.html', active='executables', executables=execs)
-
-
-@app.route('/download/<filename>', methods=['GET'])
-def downloads(filename):
-    # Check if the file exists.
-    executable = Executables.query.filter_by(filename=filename).first()
-
-    # If no file was found, return a 404 response.
-    if not executable:
-        return jsonify({"error": "Executable not found"}), 404
-
-    # If the file is public, provide it for download.
-    if executable.public:
-        return Response(
-            executable.binary_data,
-            mimetype="application/octet-stream",
-            headers={"Content-Disposition": f"attachment;filename={filename}"}
-        )
-
-    # If the file is private and the user is not authenticated, return a 403 response.
-    elif not executable.public and not current_user.is_authenticated:
-        return jsonify({"error": "You are not authorized to access this object."}), 403
-
-    # If the file is private and the user is authenticated, provide it for download.
-    elif not executable.public and current_user.is_authenticated:
-        return Response(
-            executable.binary_data,
-            mimetype="application/octet-stream",
-            headers={"Content-Disposition": f"attachment;filename={filename}"}
-        )
 
 
 @app.route('/delete_exe/<int:exe_id>', methods=['GET'])
