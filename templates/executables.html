@@ -6,11 +6,83 @@
 
 {% block stylesheets %}
     <style>
-
+        #uploadButton {
+            margin-bottom: 2%;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
+
+    <!-- Button to trigger modal -->
+    <button id="uploadButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal">
+        Upload Executable
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadModalLabel">Upload Form</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="exeUploadForm">
+                        <!-- Filename field with counter -->
+                        <div class="form-group">
+                            <label for="filename">Filename (will be saved as .exe):</label>
+                            <input type="text" class="form-control" id="filename" name="filename"
+                                   placeholder="Enter filename (without .exe)" maxlength="32"
+                                   oninput="updateCounter(this, 'filename-counter')">
+                            <small id="filename-counter" class="form-text text-muted">0/32</small>
+                        </div>
+
+                        <!-- Description field with counter -->
+                        <div class="form-group">
+                            <label for="description">Description:</label>
+                            <textarea class="form-control" id="description" name="description" rows="2"
+                                      placeholder="Enter description"
+                                      maxlength="1000" oninput="updateCounter2(this, 'description-counter')"></textarea>
+                            <small id="description-counter" class="form-text text-muted">0/1000</small>
+                        </div>
+
+                        <!-- Public selection field -->
+                        <div class="form-group">
+                            <label for="public">Public:</label>
+                            <select class="form-control" id="public" name="public">
+                                <option value="True">True</option>
+                                <option value="False">False</option>
+                            </select>
+                        </div>
+
+                        <!-- File input field -->
+                        <div class="form-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="exeFileUpload" name="file"
+                                       accept=".exe">
+                                <label class="custom-file-label" for="exeFileUpload">Choose file</label>
+                            </div>
+                        </div>
+
+                        <!-- Submit button -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div class="table-container">
         <div class="table-responsive">
             <table class="table table-striped">
@@ -23,6 +95,7 @@
                     <th>Modification date</th>
                     <th>Download link</th>
                     <th>Actions</th>
+                    <th>Public</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -40,6 +113,7 @@
                             <a href="" class="btn btn-success">Replace</a>
                             <a href="" class="btn btn-success">Delete</a>
                         </td>
+                        <td>{{ exe.public }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -51,5 +125,56 @@
 
 
 {% block scripts %}
+    <script>
+        $(document).ready(function () {
+            $('#exeFileUpload').on('change', function () {
+                // Get the selected file
+                var file = this.files[0];
+
+                // Check if it's an .exe file
+                if (file && file.name.endsWith('.exe')) {
+                    // Update the label with the file name
+                    $(this).next('.custom-file-label').html(file.name);
+                } else {
+                    alert("Please select a valid .exe file.");
+                    this.value = ''; // Clear the field
+                    $(this).next('.custom-file-label').html("Choose file");
+                }
+            });
+        });
+
+        $('#exeUploadForm').on('submit', function (e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '/executables', // Your Flask route
+                type: 'POST',
+                data: formData,
+                contentType: false, // Required for FormData
+                processData: false, // Required for FormData
+                success: function (response) {
+                    // Handle success
+                    console.log('Upload successful!', response);
+                },
+                error: function (xhr, status, error) {
+                    // Handle errors
+                    console.error('Upload failed:', error);
+                }
+            });
+        });
+
+        function updateCounter(input, counterId) {
+            var counter = document.getElementById(counterId);
+            counter.textContent = input.value.length + '/' + input.maxLength;
+        }
+
+        function updateCounter2(input, counterId) {
+            var counter = document.getElementById(counterId);
+            counter.textContent = input.value.length + '/1000'; // Assuming 1000 is the max length for description
+        }
+
+
+    </script>
 {% endblock %}
 

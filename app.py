@@ -11,6 +11,7 @@ from captcha.image import ImageCaptcha
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from collections import Counter
+from werkzeug.utils import secure_filename
 
 
 # ---------------------- Flask configuration ---------------------- #
@@ -80,6 +81,7 @@ class Executables(db.Model):
     filename = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=True)
     binary_data = db.Column(db.LargeBinary, nullable=False)
+    public = db.Column(db.Boolean)
     creation_date = db.Column(db.DateTime, default=datetime.now().astimezone())
     modification_date = db.Column(db.DateTime)
 
@@ -350,6 +352,10 @@ def command():
     return render_template('command.html', active='command', agents=agents)
 
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ['exe']
+
+
 def get_total_size(path):
     total = 0
     if os.path.isfile(path):
@@ -567,6 +573,32 @@ def get_agents():
 
 @app.route('/executables', methods=['GET', 'POST'])
 def executables():
+    if request.method == 'POST':
+        file = request.files.get('file')
+        if not file:
+            return jsonify({'error': 'No file part'}), 400
+        filename = secure_filename(request.form.get('filename', '')) + '.exe'
+        description = request.form.get('description', '')
+
+        # Explicitly process 'public' value from the form
+        public_value = request.form.get('public', 'False')  # Default to 'False' if not provided
+        public = True if public_value == 'True' else False  # Convert to boolean
+
+        if file and allowed_file(filename):
+            binary_data = file.read()
+
+            new_exec = Executables(
+                filename=filename,
+                description=description,
+                binary_data=binary_data,
+                public=public,
+                creation_date=datetime.now().astimezone(),
+            )
+            db.session.add(new_exec)
+            db.session.commit()
+
+            return jsonify({'message': 'File uploaded successfully', 'id': new_exec.id}), 200
+
     execs = Executables.query.all()
     return render_template('executables.html', active='executables', executables=execs)
 

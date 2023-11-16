@@ -18,6 +18,6 @@ def add_admin():
 		db.session.commit()
 		print("New admin account has been created.")
 
-delete_agents()
+#delete_agents()
 #add_admin()
 
