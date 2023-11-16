@@ -573,6 +573,7 @@ def get_agents():
 
 
 @app.route('/executables', methods=['GET', 'POST'])
+@login_required
 def executables():
     if request.method == 'POST':
         file = request.files.get('file')
