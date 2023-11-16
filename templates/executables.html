@@ -147,6 +147,9 @@
             e.preventDefault();
             var formData = new FormData(this);
 
+            // Show loading spinner and message
+            $('#sendingForm').show();
+
             $.ajax({
                 url: '/executables', // Your Flask route
                 type: 'POST',
@@ -154,15 +157,32 @@
                 contentType: false, // Required for FormData
                 processData: false, // Required for FormData
                 success: function (response) {
-                    // Handle success
+                    // Hide loading spinner and message
+                    $('#sendingForm').hide();
+
+                    // Insert success message directly into the modal body
+                    var successMessage = '<div id="dynamicSuccessAlert" class="alert alert-success" role="alert">' +
+                        'Upload successful!' +
+                        '</div>';
+                    $('.modal-body').prepend(successMessage);
+
+                    // Remove success message after 5 seconds
+                    setTimeout(function () {
+                        $('#dynamicSuccessAlert').fadeOut('slow', function () {
+                            $(this).remove(); // This will remove the alert from the DOM after fading out
+                        });
+                    }, 5000);
+
                     console.log('Upload successful!', response);
                 },
                 error: function (xhr, status, error) {
-                    // Handle errors
+                    // Hide loading spinner and message
+                    $('#sendingForm').hide();
                     console.error('Upload failed:', error);
                 }
             });
         });
+
 
         function updateCounter(input, counterId) {
             var counter = document.getElementById(counterId);
