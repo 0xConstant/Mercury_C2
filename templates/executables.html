@@ -105,7 +105,6 @@
                     <th>Filename</th>
                     <th>Description</th>
                     <th>Creation date</th>
-                    <th>Modification date</th>
                     <th>Delete</th>
                     <th>Public</th>
                     <th>Link</th>
@@ -118,7 +117,6 @@
                         <td>{{ exe.filename }}</td>
                         <td class="description-cell">{{ exe.description }}</td>
                         <td>{{ exe.creation_date }}</td>
-                        <td>{{ exe.modification_date }}</td>
                         <td>
 
                             <button onclick="DeleteExecutable({{ exe.id }})" class="btn btn-danger">Delete</button>
