@@ -98,7 +98,6 @@
                     <th>Description</th>
                     <th>Creation date</th>
                     <th>Modification date</th>
-                    <th>Download link</th>
                     <th>Actions</th>
                     <th>Public</th>
                     <th>Link</th>
@@ -112,10 +111,8 @@
                         <td>{{ exe.description }}</td>
                         <td>{{ exe.creation_date }}</td>
                         <td>{{ exe.modification_date }}</td>
-                        <td>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</td>
                         <td>
-                            <a href="" class="btn btn-warning">Edit</a>
-                            <a href="" class="btn btn-info">Replace</a>
+                            <a href="" class="btn btn-info">Edit</a>
                             <button onclick="DeleteExecutable({{ exe.id }})" class="btn btn-danger">Delete</button>
                         </td>
                         <td>{{ exe.public }}</td>
