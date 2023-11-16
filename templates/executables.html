@@ -14,6 +14,15 @@
             background-color: #003965;
             color: #fff;
         }
+
+        .description-cell {
+            width: 300px !important;
+            max-width: 300px !important;
+            overflow-x: scroll !important;
+            white-space: nowrap !important;
+            display: block !important;
+        }
+
     </style>
 {% endblock %}
 
@@ -108,7 +117,7 @@
                     <tr>
                         <td>{{ exe.id }}</td>
                         <td>{{ exe.filename }}</td>
-                        <td>{{ exe.description }}</td>
+                        <td class="description-cell">{{ exe.description }}</td>
                         <td>{{ exe.creation_date }}</td>
                         <td>{{ exe.modification_date }}</td>
                         <td>
@@ -117,7 +126,9 @@
                         </td>
                         <td>{{ exe.public }}</td>
                         <td>
-                            <a id="downloadBtn" href="{{ request.host_url[:-1] + url_for('downloads', filename=exe.filename) }}" class="btn">Download</a>
+                            <a id="downloadBtn"
+                               href="{{ request.host_url[:-1] + url_for('downloads', filename=exe.filename) }}"
+                               class="btn">Download</a>
                         </td>
 
                     </tr>
@@ -201,21 +212,21 @@
         }
 
         function DeleteExecutable(exe_id) {
-                var confirmation = confirm("Do you want to delete this executable?");
+            var confirmation = confirm("Do you want to delete this executable?");
 
-                if (confirmation) {
-                    $.ajax({
-                        type: "GET",
-                        url: "/delete_exe/" + exe_id,
-                        success: function (response) {
-                            window.location.href = "/executables";
-                        },
-                        error: function (error) {
-                            window.location.href = "/executables";
-                        }
-                    });
-                }
+            if (confirmation) {
+                $.ajax({
+                    type: "GET",
+                    url: "/delete_exe/" + exe_id,
+                    success: function (response) {
+                        window.location.href = "/executables";
+                    },
+                    error: function (error) {
+                        window.location.href = "/executables";
+                    }
+                });
             }
+        }
 
 
     </script>
