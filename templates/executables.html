@@ -9,6 +9,11 @@
         #uploadButton {
             margin-bottom: 2%;
         }
+
+        #downloadBtn {
+            background-color: #003965;
+            color: #fff;
+        }
     </style>
 {% endblock %}
 
@@ -96,6 +101,7 @@
                     <th>Download link</th>
                     <th>Actions</th>
                     <th>Public</th>
+                    <th>Link</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -108,12 +114,15 @@
                         <td>{{ exe.modification_date }}</td>
                         <td>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</td>
                         <td>
-                            <a href="" class="btn btn-success">Edit</a>
-                            <a href="" class="btn btn-success">Download</a>
-                            <a href="" class="btn btn-success">Replace</a>
-                            <a href="" class="btn btn-success">Delete</a>
+                            <a href="" class="btn btn-warning">Edit</a>
+                            <a href="" class="btn btn-info">Replace</a>
+                            <a href="" class="btn btn-danger">Delete</a>
                         </td>
                         <td>{{ exe.public }}</td>
+                        <td>
+                            <a id="downloadBtn" href="{{ request.host_url[:-1] + url_for('downloads', filename=exe.filename) }}" class="btn">Download</a>
+                        </td>
+
                     </tr>
                 {% endfor %}
                 </tbody>

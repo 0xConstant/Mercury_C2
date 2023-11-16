@@ -1,6 +1,7 @@
 from flask import (Flask, request, jsonify, render_template,
                    send_file, send_from_directory, redirect,
-                   flash, url_for, session, after_this_request)
+                   flash, url_for, session, after_this_request,
+                   Response)
 import os, zipfile, random, requests, shutil, json, base64, tempfile
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
@@ -601,6 +602,36 @@ def executables():
 
     execs = Executables.query.all()
     return render_template('executables.html', active='executables', executables=execs)
+
+
+@app.route('/download/<filename>', methods=['GET'])
+def downloads(filename):
+    # Check if the file exists.
+    executable = Executables.query.filter_by(filename=filename).first()
+
+    # If no file was found, return a 404 response.
+    if not executable:
+        return jsonify({"error": "Executable not found"}), 404
+
+    # If the file is public, provide it for download.
+    if executable.public:
+        return Response(
+            executable.binary_data,
+            mimetype="application/octet-stream",
+            headers={"Content-Disposition": f"attachment;filename={filename}"}
+        )
+
+    # If the file is private and the user is not authenticated, return a 403 response.
+    elif not executable.public and not current_user.is_authenticated:
+        return jsonify({"error": "You are not authorized to access this object."}), 403
+
+    # If the file is private and the user is authenticated, provide it for download.
+    elif not executable.public and current_user.is_authenticated:
+        return Response(
+            executable.binary_data,
+            mimetype="application/octet-stream",
+            headers={"Content-Disposition": f"attachment;filename={filename}"}
+        )
 
 
 @app.route('/logout')
