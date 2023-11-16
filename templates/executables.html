@@ -116,7 +116,7 @@
                         <td>
                             <a href="" class="btn btn-warning">Edit</a>
                             <a href="" class="btn btn-info">Replace</a>
-                            <a href="" class="btn btn-danger">Delete</a>
+                            <button onclick="DeleteExecutable({{ exe.id }})" class="btn btn-danger">Delete</button>
                         </td>
                         <td>{{ exe.public }}</td>
                         <td>
@@ -202,6 +202,23 @@
             var counter = document.getElementById(counterId);
             counter.textContent = input.value.length + '/1000'; // Assuming 1000 is the max length for description
         }
+
+        function DeleteExecutable(exe_id) {
+                var confirmation = confirm("Do you want to delete this executable?");
+
+                if (confirmation) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/delete_exe/" + exe_id,
+                        success: function (response) {
+                            window.location.href = "/executables";
+                        },
+                        error: function (error) {
+                            window.location.href = "/executables";
+                        }
+                    });
+                }
+            }
 
 
     </script>

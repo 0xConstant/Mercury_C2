@@ -634,6 +634,19 @@ def downloads(filename):
         )
 
 
+@app.route('/delete_exe/<int:exe_id>', methods=['GET'])
+@login_required
+def delete_exe(exe_id):
+    exe = Executables.query.get(exe_id)
+    if exe:
+        db.session.delete(exe)
+        db.session.commit()
+        flash(f'The executable {exe.filename} has been deleted.', 'success')
+    else:
+        flash('Error deleting executable.', 'danger')
+    return jsonify({"status": "done"})
+
+
 @app.route('/logout')
 @login_required
 def logout():
